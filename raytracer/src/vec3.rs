@@ -23,26 +23,25 @@ impl ops::Sub for Vec3 {
     }
 }
 
-
-pub fn mul_vec_dot(lhs:Vec3, rhs: Vec3) -> f64 {
-        
+pub fn mul_vec_dot(lhs: Vec3, rhs: Vec3) -> f64 {
     lhs.e.0 * rhs.e.0 + lhs.e.1 * rhs.e.1 + lhs.e.2 * rhs.e.2
-        
 }
-pub fn mul_vec_cross(lhs:Vec3, rhs: Vec3) -> Vec3{
-
-    Vec3 { 
-        e: (lhs.e.1*rhs.e.2-lhs.e.2*rhs.e.1,
-            lhs.e.2*rhs.e.0-lhs.e.0*rhs.e.2,
-            lhs.e.0*rhs.e.1-lhs.e.1*rhs.e.0
-        ) 
+pub fn mul_vec_cross(lhs: Vec3, rhs: Vec3) -> Vec3 {
+    Vec3 {
+        e: (
+            lhs.e.1 * rhs.e.2 - lhs.e.2 * rhs.e.1,
+            lhs.e.2 * rhs.e.0 - lhs.e.0 * rhs.e.2,
+            lhs.e.0 * rhs.e.1 - lhs.e.1 * rhs.e.0,
+        ),
     }
 }
-pub fn mul_num(lhs:Vec3, rhs: f64) -> Vec3{
-    Vec3 { e: ((lhs.e.0) * rhs, (lhs.e.1) * rhs, (lhs.e.2) * rhs) }
+pub fn mul_num(lhs: Vec3, rhs: f64) -> Vec3 {
+    Vec3 {
+        e: ((lhs.e.0) * rhs, (lhs.e.1) * rhs, (lhs.e.2) * rhs),
+    }
 }
-fn div_vec(lhs:Vec3,rhs: f64) -> Vec3{
-    mul_num(lhs, 1.0/rhs)
+fn div_vec(lhs: Vec3, rhs: f64) -> Vec3 {
+    mul_num(lhs, 1.0 / rhs)
 }
 impl ops::AddAssign for Vec3 {
     fn add_assign(&mut self, other: Self) {
@@ -76,9 +75,9 @@ impl ops::Neg for Vec3 {
 }
 impl ops::Div<f64> for Vec3 {
     type Output = Vec3;
-    fn div(self,rhs:f64) -> Vec3 {
+    fn div(self, rhs: f64) -> Vec3 {
         Vec3 {
-            e: (self.e.0/rhs, self.e.1/rhs, self.e.2/rhs),
+            e: (self.e.0 / rhs, self.e.1 / rhs, self.e.2 / rhs),
         }
     }
 }
@@ -94,9 +93,9 @@ impl Vec3 {
     pub fn length(&self) -> f64 {
         self.length_square().sqrt()
     }
-    pub fn unit_vector(&self) -> Vec3{
+    pub fn unit_vector(&self) -> Vec3 {
         div_vec(*self, self.length())
     }
 }
 pub type Color = Vec3;
-pub type Point3 =Vec3;
+pub type Point3 = Vec3;
