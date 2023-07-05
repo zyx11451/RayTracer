@@ -19,17 +19,29 @@ fn hit_sphere(center: Point3, radius: f64, r: Ray) -> f64 {
     let b = 2.0 * mul_vec_dot(oc, r.dir);
     let c = mul_vec_dot(oc, oc) - radius * radius;
     let discriminant = b * b - 4.0 * a * c;
-    if discriminant<0.0 {
+    if discriminant < 0.0 {
         -1.0
     } else {
-        (-b-discriminant.sqrt())/(a*2.0)
+        (-b - discriminant.sqrt()) / (a * 2.0)
     }
 }
 fn ray_color(r: Ray) -> Color {
-    let t= hit_sphere(Point3 { e: (0.0, 0.0, -1.0) }, 0.5, r);
-    if  t > 0.0 {
-        let n: Vec3 = (r.at(t)-Vec3{e:(0.0,0.0,-1.0)}).unit_vector();
-        Color { e: (n.e.0+1.0, n.e.1+1.0, n.e.2+1.0) }*0.5
+    let t = hit_sphere(
+        Point3 {
+            e: (0.0, 0.0, -1.0),
+        },
+        0.5,
+        r,
+    );
+    if t > 0.0 {
+        let n: Vec3 = (r.at(t)
+            - Vec3 {
+                e: (0.0, 0.0, -1.0),
+            })
+        .unit_vector();
+        Color {
+            e: (n.e.0 + 1.0, n.e.1 + 1.0, n.e.2 + 1.0),
+        } * 0.5
     } else {
         let unit_direction: Vec3 = r.dir.unit_vector();
         let t: f64 = 0.5 * (unit_direction.e.1 + 1.0);
