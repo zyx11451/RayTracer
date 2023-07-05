@@ -9,6 +9,7 @@ pub fn write_color(tar: Color) -> image::Rgb<u8> {
     let b: f64 = tar.e.2 * 255.999;
     image::Rgb([r as u8, g as u8, b as u8])
 }
+#[derive(Debug, Clone, Copy)]
 pub struct Ray {
     pub orig: Point3,
     pub dir: Vec3,

@@ -5,6 +5,7 @@ use image::{ImageBuffer, RgbImage};
 use indicatif::ProgressBar;
 use std::{fs::File, process::exit};
 use vec3::mul_num;
+use vec3::mul_vec_dot;
 
 use crate::ray::write_color;
 use crate::ray::Ray;
@@ -12,14 +13,26 @@ use crate::vec3::Color;
 use crate::vec3::Point3;
 use crate::vec3::Vec3;
 
+fn hit_sphere(center: Point3, radius: f64, r: Ray) -> bool {
+    let oc: Vec3 = r.orig - center;
+    let a = mul_vec_dot(r.dir, r.dir);
+    let b = 2.0 * mul_vec_dot(oc, r.dir);
+    let c = mul_vec_dot(oc, oc) - radius * radius;
+    let discriminant = b * b - 4.0 * a * c;
+    discriminant > 0.0
+}
 fn ray_color(r: Ray) -> Color {
-    let unit_direction: Vec3 = r.dir.unit_vector();
-    let t: f64 = 0.5 * (unit_direction.e.1 + 1.0);
-    mul_num(Color { e: (1.0, 1.0, 1.0) }, 1.0 - t) + mul_num(Color { e: (0.5, 0.7, 1.0) }, t)
+    if hit_sphere(Point3 { e: (0.0, 0.0, 1.0) }, 0.5, r) {
+        Color { e: (1.0, 0.0, 0.0) }
+    } else {
+        let unit_direction: Vec3 = r.dir.unit_vector();
+        let t: f64 = 0.5 * (unit_direction.e.1 + 1.0);
+        mul_num(Color { e: (1.0, 1.0, 1.0) }, 1.0 - t) + mul_num(Color { e: (0.5, 0.7, 1.0) }, t)
+    }
 }
 fn main() {
     //
-    let path = std::path::Path::new("output/book1/image2.jpg");
+    let path = std::path::Path::new("output/book1/image3.jpg");
     let prefix = path.parent().unwrap();
     std::fs::create_dir_all(prefix).expect("Cannot create all the parents");
     //Image
