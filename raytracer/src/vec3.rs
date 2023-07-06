@@ -108,5 +108,10 @@ impl Vec3 {
         Self { e: (0.0, 0.0, 0.0) }
     }
 }
+impl Default for Vec3 {
+    fn default() -> Self {
+        Self::new()
+    }
+}
 pub type Color = Vec3;
 pub type Point3 = Vec3;

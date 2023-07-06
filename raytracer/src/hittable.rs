@@ -32,7 +32,11 @@ impl HitRecord {
         }
     }
 }
-
+impl Default for HitRecord {
+    fn default() -> Self {
+        Self::new()
+    }
+}
 pub struct HittableList {
     pub objects: Vec<Box<dyn Hittable>>,
 }
@@ -47,6 +51,11 @@ impl HittableList {
         Self {
             objects: Vec::new(),
         }
+    }
+}
+impl Default for HittableList {
+    fn default() -> Self {
+        Self::new()
     }
 }
 impl Hittable for HittableList {
