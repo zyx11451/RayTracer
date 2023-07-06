@@ -1,46 +1,45 @@
+pub mod hittable;
 pub mod ray;
 pub mod vec3;
 use console::style;
+use hittable::HitRecord;
+use hittable::HittableList;
 use image::{ImageBuffer, RgbImage};
 use indicatif::ProgressBar;
+use std::f64::INFINITY;
 use std::{fs::File, process::exit};
 use vec3::mul_num;
-use vec3::mul_vec_dot;
+//use vec3::mul_vec_dot;
 
+use crate::hittable::Hittable;
+use crate::hittable::Sphere;
 use crate::ray::write_color;
 use crate::ray::Ray;
 use crate::vec3::Color;
 use crate::vec3::Point3;
 use crate::vec3::Vec3;
 
-fn hit_sphere(center: Point3, radius: f64, r: Ray) -> f64 {
+/*fn hit_sphere(center: Point3, radius: f64, r: Ray) -> f64 {
     let oc: Vec3 = r.orig - center;
-    let a = mul_vec_dot(r.dir, r.dir);
-    let b = 2.0 * mul_vec_dot(oc, r.dir);
-    let c = mul_vec_dot(oc, oc) - radius * radius;
-    let discriminant = b * b - 4.0 * a * c;
+    let a = r.dir.length_square();
+    let half_b = mul_vec_dot(oc, r.dir);
+    let c = oc.length_square() - radius * radius;
+    let discriminant = half_b * half_b - a * c;
     if discriminant < 0.0 {
         -1.0
     } else {
-        (-b - discriminant.sqrt()) / (a * 2.0)
+        (-half_b - discriminant.sqrt()) / a
     }
-}
-fn ray_color(r: Ray) -> Color {
-    let t = hit_sphere(
-        Point3 {
-            e: (0.0, 0.0, -1.0),
-        },
-        0.5,
-        r,
-    );
-    if t > 0.0 {
-        let n: Vec3 = (r.at(t)
-            - Vec3 {
-                e: (0.0, 0.0, -1.0),
-            })
-        .unit_vector();
+}*/
+fn ray_color(r: Ray, world: &mut HittableList) -> Color {
+    let mut rec: HitRecord = HitRecord::new();
+    if world.hit(r, 0.0, INFINITY, &mut rec) {
         Color {
-            e: (n.e.0 + 1.0, n.e.1 + 1.0, n.e.2 + 1.0),
+            e: (
+                rec.normal.e.0 + 1.0,
+                rec.normal.e.1 + 1.0,
+                rec.normal.e.2 + 1.0,
+            ),
         } * 0.5
     } else {
         let unit_direction: Vec3 = r.dir.unit_vector();
@@ -50,7 +49,7 @@ fn ray_color(r: Ray) -> Color {
 }
 fn main() {
     //
-    let path = std::path::Path::new("output/book1/image4.jpg");
+    let path = std::path::Path::new("output/book1/image5.jpg");
     let prefix = path.parent().unwrap();
     std::fs::create_dir_all(prefix).expect("Cannot create all the parents");
     //Image
@@ -64,6 +63,20 @@ fn main() {
     } else {
         ProgressBar::new((height * width) as u64)
     };
+    //World
+    let mut world: HittableList = HittableList::new();
+    world.add(Box::new(Sphere {
+        center: Point3 {
+            e: (0.0, 0.0, -1.0),
+        },
+        radius: 0.5,
+    }));
+    world.add(Box::new(Sphere {
+        center: Point3 {
+            e: (0.0, -100.5, -1.0),
+        },
+        radius: 100.0,
+    }));
     //Camera
     let viewport_height = 2.0;
     let viewport_width = aspect_ratio * viewport_height;
@@ -92,7 +105,7 @@ fn main() {
                 orig: origin,
                 dir: lower_left_corner + mul_num(horizontal, u) + mul_num(vertical, v) - origin,
             };
-            let pixel_color: Color = ray_color(r);
+            let pixel_color: Color = ray_color(r, &mut world);
             *pixel = write_color(pixel_color);
         }
         progress.inc(1);

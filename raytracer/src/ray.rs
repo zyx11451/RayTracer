@@ -1,5 +1,4 @@
 use super::vec3::Color;
-
 use super::vec3::mul_num;
 use super::vec3::Point3;
 use super::vec3::Vec3;

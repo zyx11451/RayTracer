@@ -1,0 +1,102 @@
+use super::ray::Ray;
+use super::vec3::mul_vec_dot;
+use super::vec3::Point3;
+use super::vec3::Vec3;
+use std::vec::Vec;
+
+pub trait Hittable {
+    fn hit(&self, r: Ray, t_min: f64, t_max: f64, rec: &mut HitRecord) -> bool;
+}
+#[derive(Debug, Clone, Copy)]
+pub struct HitRecord {
+    pub p: Point3,
+    pub normal: Vec3,
+    pub t: f64,
+    pub front_face: bool,
+}
+impl HitRecord {
+    pub fn set_face_normal(&mut self, r: Ray, outward_normal: Vec3) {
+        self.front_face = mul_vec_dot(r.dir, outward_normal) < 0.0;
+        if self.front_face {
+            self.normal = outward_normal;
+        } else {
+            self.normal = -outward_normal;
+        }
+    }
+    pub fn new() -> Self {
+        Self {
+            p: (Vec3::new()),
+            normal: (Vec3::new()),
+            t: (0.0),
+            front_face: (true),
+        }
+    }
+}
+
+pub struct HittableList {
+    pub objects: Vec<Box<dyn Hittable>>,
+}
+impl HittableList {
+    pub fn add(&mut self, object: Box<dyn Hittable>) {
+        self.objects.push(object);
+    }
+    pub fn clear(&mut self) {
+        self.objects.clear();
+    }
+    pub fn new() -> Self {
+        Self {
+            objects: Vec::new(),
+        }
+    }
+}
+impl Hittable for HittableList {
+    fn hit(&self, r: Ray, t_min: f64, t_max: f64, rec: &mut HitRecord) -> bool {
+        let mut temp_rec: HitRecord = HitRecord::new();
+        let mut hit_anything: bool = false;
+        let mut closest_so_far = t_max;
+        for object in &self.objects {
+            if object.hit(r, t_min, closest_so_far, &mut temp_rec) {
+                hit_anything = true;
+                closest_so_far = temp_rec.t;
+                rec.t = temp_rec.t;
+                rec.p = temp_rec.p;
+                rec.normal = temp_rec.normal;
+                rec.front_face = temp_rec.front_face;
+            }
+        }
+        hit_anything
+    }
+}
+
+#[derive(Debug, Clone, Copy)]
+pub struct Sphere {
+    pub center: Point3,
+    pub radius: f64,
+}
+impl Hittable for Sphere {
+    fn hit(&self, r: Ray, t_min: f64, t_max: f64, rec: &mut HitRecord) -> bool {
+        let oc: Vec3 = r.orig - self.center;
+        let a = r.dir.length_square();
+        let half_b = mul_vec_dot(oc, r.dir);
+        let c = oc.length_square() - self.radius * self.radius;
+
+        let discriminant = half_b * half_b - a * c;
+        if discriminant < 0.0 {
+            return false;
+        }
+        let sqrtd = discriminant.sqrt();
+        let mut root = (-half_b - sqrtd) / a;
+        if root < t_min || t_max < root {
+            root = (-half_b + sqrtd) / a;
+            if root < t_min || t_max < root {
+                return false;
+            }
+        }
+        rec.t = root;
+        rec.p = r.at(rec.t);
+        rec.normal = (rec.p - self.center) / self.radius;
+        let outward_normal = (rec.p - self.center) / self.radius;
+        rec.set_face_normal(r, outward_normal);
+        true
+    }
+}
