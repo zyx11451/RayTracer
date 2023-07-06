@@ -114,7 +114,7 @@ fn main() {
                     / (height - 1) as f64;
                 let r: Ray = cam.get_ray(u, v);
                 pixel_color.add_assign(ray_color(r, &mut world));
-                s = s + 1;
+                s += 1;
             }
             *pixel = write_color(pixel_color, samples_per_pixel);
         }
