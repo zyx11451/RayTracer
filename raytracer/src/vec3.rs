@@ -104,8 +104,8 @@ impl Vec3 {
     pub fn unit_vector(&self) -> Vec3 {
         div_vec(*self, self.length())
     }
-    pub fn new() -> Self{
-        Self { e: (0.0,0.0,0.0) }
+    pub fn new() -> Self {
+        Self { e: (0.0, 0.0, 0.0) }
     }
 }
 pub type Color = Vec3;
