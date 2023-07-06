@@ -1,4 +1,6 @@
+pub mod camera;
 pub mod hittable;
+pub mod randoms;
 pub mod ray;
 pub mod vec3;
 use console::style;
@@ -7,12 +9,15 @@ use hittable::HittableList;
 use image::{ImageBuffer, RgbImage};
 use indicatif::ProgressBar;
 use std::f64::INFINITY;
+use std::ops::AddAssign;
 use std::{fs::File, process::exit};
 use vec3::mul_num;
 //use vec3::mul_vec_dot;
 
+use crate::camera::Camera;
 use crate::hittable::Hittable;
 use crate::hittable::Sphere;
+use crate::randoms::random_double;
 use crate::ray::write_color;
 use crate::ray::Ray;
 use crate::vec3::Color;
@@ -49,7 +54,7 @@ fn ray_color(r: Ray, world: &mut HittableList) -> Color {
 }
 fn main() {
     //
-    let path = std::path::Path::new("output/book1/image5.jpg");
+    let path = std::path::Path::new("output/book1/image6.jpg");
     let prefix = path.parent().unwrap();
     std::fs::create_dir_all(prefix).expect("Cannot create all the parents");
     //Image
@@ -58,6 +63,7 @@ fn main() {
     let height = ((width as f64) / aspect_ratio) as u32;
     let quality = 100;
     let mut img: RgbImage = ImageBuffer::new(width, height);
+    let samples_per_pixel = 100;
     let progress = if option_env!("CI").unwrap_or_default() == "true" {
         ProgressBar::hidden()
     } else {
@@ -78,7 +84,7 @@ fn main() {
         radius: 100.0,
     }));
     //Camera
-    let viewport_height = 2.0;
+    /*let viewport_height = 2.0;
     let viewport_width = aspect_ratio * viewport_height;
     let focal_length = 1.0;
 
@@ -94,19 +100,23 @@ fn main() {
         - vertical / 2.0
         - Vec3 {
             e: (0.0, 0.0, focal_length),
-        };
+        };*/
+    let cam = Camera::new();
     //Render
     for j in (0..height).rev() {
         for i in 0..width {
             let pixel = img.get_pixel_mut(i, j);
-            let u = (1.0 * i as f64) / (width - 1) as f64;
-            let v = (1.0 * (height - j - 1) as f64) / (height - 1) as f64;
-            let r: Ray = Ray {
-                orig: origin,
-                dir: lower_left_corner + mul_num(horizontal, u) + mul_num(vertical, v) - origin,
-            };
-            let pixel_color: Color = ray_color(r, &mut world);
-            *pixel = write_color(pixel_color);
+            let mut pixel_color: Color = Color { e: (0.0, 0.0, 0.0) };
+            let mut s = 0;
+            while s < samples_per_pixel {
+                let u = (1.0 * (i as f64) + random_double(0.0, 1.0)) / (width - 1) as f64;
+                let v = (1.0 * ((height - j - 1) as f64) + random_double(0.0, 1.0))
+                    / (height - 1) as f64;
+                let r: Ray = cam.get_ray(u, v);
+                pixel_color.add_assign(ray_color(r, &mut world));
+                s = s + 1;
+            }
+            *pixel = write_color(pixel_color, samples_per_pixel);
         }
         progress.inc(1);
     }
