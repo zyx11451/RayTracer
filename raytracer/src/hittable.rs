@@ -1,18 +1,23 @@
+use crate::material::Lambertian;
+use crate::material::Material;
+
 use super::ray::Ray;
 use super::vec3::mul_vec_dot;
 use super::vec3::Point3;
 use super::vec3::Vec3;
+use std::rc::Rc;
 use std::vec::Vec;
 
 pub trait Hittable {
     fn hit(&self, r: Ray, t_min: f64, t_max: f64, rec: &mut HitRecord) -> bool;
 }
-#[derive(Debug, Clone, Copy)]
+#[derive(Clone)]
 pub struct HitRecord {
     pub p: Point3,
     pub normal: Vec3,
     pub t: f64,
     pub front_face: bool,
+    pub mat_ptr: Rc<dyn Material>,
 }
 impl HitRecord {
     pub fn set_face_normal(&mut self, r: Ray, outward_normal: Vec3) {
@@ -29,6 +34,9 @@ impl HitRecord {
             normal: (Vec3::new()),
             t: (0.0),
             front_face: (true),
+            mat_ptr: (Rc::new(Lambertian {
+                albedo: (Vec3 { e: (0.0, 0.0, 0.0) }),
+            })),
         }
     }
 }
@@ -67,20 +75,18 @@ impl Hittable for HittableList {
             if object.hit(r, t_min, closest_so_far, &mut temp_rec) {
                 hit_anything = true;
                 closest_so_far = temp_rec.t;
-                rec.t = temp_rec.t;
-                rec.p = temp_rec.p;
-                rec.normal = temp_rec.normal;
-                rec.front_face = temp_rec.front_face;
+                *rec = temp_rec.clone();
             }
         }
         hit_anything
     }
 }
 
-#[derive(Debug, Clone, Copy)]
+#[derive(Clone)]
 pub struct Sphere {
     pub center: Point3,
     pub radius: f64,
+    pub mat_ptr: Rc<dyn Material>,
 }
 impl Hittable for Sphere {
     fn hit(&self, r: Ray, t_min: f64, t_max: f64, rec: &mut HitRecord) -> bool {
@@ -106,6 +112,7 @@ impl Hittable for Sphere {
         rec.normal = (rec.p - self.center) / self.radius;
         let outward_normal = (rec.p - self.center) / self.radius;
         rec.set_face_normal(r, outward_normal);
+        rec.mat_ptr = self.mat_ptr.clone();
         true
     }
 }

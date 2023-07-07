@@ -40,6 +40,9 @@ pub fn mul_num(lhs: Vec3, rhs: f64) -> Vec3 {
         e: ((lhs.e.0) * rhs, (lhs.e.1) * rhs, (lhs.e.2) * rhs),
     }
 }
+pub fn reflect(v: Vec3, n: Vec3) -> Vec3 {
+    v - mul_num(n, 2.0 * mul_vec_dot(v, n))
+}
 fn div_vec(lhs: Vec3, rhs: f64) -> Vec3 {
     mul_num(lhs, 1.0 / rhs)
 }
@@ -89,6 +92,14 @@ impl ops::Mul<f64> for Vec3 {
         }
     }
 }
+impl ops::Mul<Vec3> for Vec3 {
+    type Output = Vec3;
+    fn mul(self, rhs: Vec3) -> Vec3 {
+        Vec3 {
+            e: (self.e.0 * rhs.e.0, self.e.1 * rhs.e.1, self.e.2 * rhs.e.2),
+        }
+    }
+}
 impl Vec3 {
     pub fn mul_assign(&mut self, other: f64) {
         *self = Vec3 {
@@ -103,6 +114,15 @@ impl Vec3 {
     }
     pub fn unit_vector(&self) -> Vec3 {
         div_vec(*self, self.length())
+    }
+    pub fn near_zero(&self) -> bool {
+        let s = 1e-8;
+        (self.e.0 < s)
+            && (self.e.1 < s)
+            && (self.e.2 < s)
+            && (self.e.0 > -s)
+            && (self.e.1 > -s)
+            && (self.e.2 > -s)
     }
     pub fn new() -> Self {
         Self { e: (0.0, 0.0, 0.0) }
