@@ -8,6 +8,7 @@ use hittable::HitRecord;
 use hittable::HittableList;
 use image::{ImageBuffer, RgbImage};
 use indicatif::ProgressBar;
+use randoms::random_in_unit_sphere;
 use std::f64::INFINITY;
 use std::ops::AddAssign;
 use std::{fs::File, process::exit};
@@ -24,28 +25,24 @@ use crate::vec3::Color;
 use crate::vec3::Point3;
 use crate::vec3::Vec3;
 
-/*fn hit_sphere(center: Point3, radius: f64, r: Ray) -> f64 {
-    let oc: Vec3 = r.orig - center;
-    let a = r.dir.length_square();
-    let half_b = mul_vec_dot(oc, r.dir);
-    let c = oc.length_square() - radius * radius;
-    let discriminant = half_b * half_b - a * c;
-    if discriminant < 0.0 {
-        -1.0
-    } else {
-        (-half_b - discriminant.sqrt()) / a
-    }
-}*/
-fn ray_color(r: Ray, world: &mut HittableList) -> Color {
+fn ray_color(r: Ray, world: &mut HittableList, depth: i32) -> Color {
     let mut rec: HitRecord = HitRecord::new();
-    if world.hit(r, 0.0, INFINITY, &mut rec) {
-        Color {
-            e: (
-                rec.normal.e.0 + 1.0,
-                rec.normal.e.1 + 1.0,
-                rec.normal.e.2 + 1.0,
+    if depth <= 0 {
+        return Color { e: (0.0, 0.0, 0.0) };
+    }
+    if world.hit(r, 0.001, INFINITY, &mut rec) {
+        let target: Point3 = rec.p + rec.normal + random_in_unit_sphere();
+        return mul_num(
+            ray_color(
+                Ray {
+                    orig: (rec.p),
+                    dir: (target - rec.p),
+                },
+                world,
+                depth - 1,
             ),
-        } * 0.5
+            0.5,
+        );
     } else {
         let unit_direction: Vec3 = r.dir.unit_vector();
         let t: f64 = 0.5 * (unit_direction.e.1 + 1.0);
@@ -54,7 +51,7 @@ fn ray_color(r: Ray, world: &mut HittableList) -> Color {
 }
 fn main() {
     //
-    let path = std::path::Path::new("output/book1/image6.jpg");
+    let path = std::path::Path::new("output/book1/image7.jpg");
     let prefix = path.parent().unwrap();
     std::fs::create_dir_all(prefix).expect("Cannot create all the parents");
     //Image
@@ -62,8 +59,9 @@ fn main() {
     let width = 400;
     let height = ((width as f64) / aspect_ratio) as u32;
     let quality = 100;
-    let mut img: RgbImage = ImageBuffer::new(width, height);
     let samples_per_pixel = 100;
+    let max_depth = 50;
+    let mut img: RgbImage = ImageBuffer::new(width, height);
     let progress = if option_env!("CI").unwrap_or_default() == "true" {
         ProgressBar::hidden()
     } else {
@@ -84,23 +82,6 @@ fn main() {
         radius: 100.0,
     }));
     //Camera
-    /*let viewport_height = 2.0;
-    let viewport_width = aspect_ratio * viewport_height;
-    let focal_length = 1.0;
-
-    let origin = Point3 { e: (0.0, 0.0, 0.0) };
-    let horizontal = Vec3 {
-        e: (viewport_width, 0.0, 0.0),
-    };
-    let vertical = Vec3 {
-        e: (0.0, viewport_height, 0.0),
-    };
-    let lower_left_corner = origin
-        - horizontal / 2.0
-        - vertical / 2.0
-        - Vec3 {
-            e: (0.0, 0.0, focal_length),
-        };*/
     let cam = Camera::new();
     //Render
     for j in (0..height).rev() {
@@ -113,12 +94,12 @@ fn main() {
                 let v = (1.0 * ((height - j - 1) as f64) + random_double(0.0, 1.0))
                     / (height - 1) as f64;
                 let r: Ray = cam.get_ray(u, v);
-                pixel_color.add_assign(ray_color(r, &mut world));
+                pixel_color.add_assign(ray_color(r, &mut world, max_depth));
                 s += 1;
             }
             *pixel = write_color(pixel_color, samples_per_pixel);
+            progress.inc(1);
         }
-        progress.inc(1);
     }
     progress.finish();
 
