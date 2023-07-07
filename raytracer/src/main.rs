@@ -112,7 +112,7 @@ fn main() {
             e: (-1.0, 0.0, -1.0),
         },
         radius: -0.4,
-        mat_ptr: material_left.clone(),
+        mat_ptr: material_left,
     }));
     world.add(Box::new(Sphere {
         center: Point3 {
