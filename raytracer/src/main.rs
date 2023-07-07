@@ -91,28 +91,28 @@ fn main() {
             e: (0.0, 0.0, -1.0),
         },
         radius: 0.5,
-        mat_ptr: material_center.clone(),
+        mat_ptr: material_center,
     }));
     world.add(Box::new(Sphere {
         center: Point3 {
             e: (0.0, -100.5, -1.0),
         },
         radius: 100.0,
-        mat_ptr: material_ground.clone(),
+        mat_ptr: material_ground,
     }));
     world.add(Box::new(Sphere {
         center: Point3 {
             e: (-1.0, 0.0, -1.0),
         },
         radius: 0.5,
-        mat_ptr: material_left.clone(),
+        mat_ptr: material_left,
     }));
     world.add(Box::new(Sphere {
         center: Point3 {
             e: (1.0, 0.0, -1.0),
         },
         radius: 0.5,
-        mat_ptr: material_right.clone(),
+        mat_ptr: material_right,
     }));
     //Camera
     let cam = Camera::new();
