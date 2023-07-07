@@ -1,4 +1,4 @@
-use crate::randoms::{random_in_unit_sphere, random_unit_vec};
+use crate::randoms::{min, random_in_unit_sphere, random_unit_vec};
 use crate::vec3::{mul_vec_dot, reflect, refract, Color, Vec3};
 
 use crate::{hittable::HitRecord, ray::Ray};
@@ -74,10 +74,17 @@ impl Material for Dielectric {
             self.ir
         };
         let unit_direction = r_in.dir.unit_vector();
-        let refracted = refract(unit_direction, rec.normal, reflection_ratio);
+        let cos_theta = min(mul_vec_dot(-unit_direction, rec.normal), 1.0);
+        let sin_theta = (1.0 - cos_theta * cos_theta).sqrt();
+        let cannot_refract = reflection_ratio * sin_theta > 1.0;
+        let direction = if cannot_refract {
+            reflect(unit_direction, rec.normal)
+        } else {
+            refract(unit_direction, rec.normal, reflection_ratio)
+        };
         *scattered = Ray {
             orig: rec.p,
-            dir: refracted,
+            dir: direction,
         };
         true
     }
