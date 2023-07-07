@@ -57,21 +57,21 @@ impl Camera {
         let h = (theta / 2.0).tan();
         let viewport_height = 2.0 * h;
         let viewport_width = aspect_ratio * viewport_height;
-        let w = (lookfrom - lookat).unit_vector();
-        let u = mul_vec_cross(vup, w).unit_vector();
-        let v = mul_vec_cross(w, u);
+        let w_ = (lookfrom - lookat).unit_vector();
+        let u_ = mul_vec_cross(vup, w_).unit_vector();
+        let v_ = mul_vec_cross(w_, u_);
         let origin_ = lookfrom;
-        let horizonal_ = u * viewport_width * focus_dist;
-        let vertical_ = v * viewport_height * focus_dist;
-        let lower_left_corner_ = origin_ - horizonal_ / 2.0 - vertical_ / 2.0 - w * focus_dist;
+        let horizonal_ = u_ * viewport_width * focus_dist;
+        let vertical_ = v_ * viewport_height * focus_dist;
+        let lower_left_corner_ = origin_ - horizonal_ / 2.0 - vertical_ / 2.0 - w_ * focus_dist;
         Self {
             origin: origin_,
             lower_left_corner: lower_left_corner_,
             horizonal: horizonal_,
             vertical: vertical_,
             //w: w,
-            u: u,
-            v: v,
+            u: u_,
+            v: v_,
             lens_radius: aperture / 2.0,
         }
     }
