@@ -55,7 +55,7 @@ fn ray_color(r: Ray, world: &mut HittableList, depth: i32) -> Color {
 }
 fn main() {
     //
-    let path = std::path::Path::new("output/book1/image11.jpg");
+    let path = std::path::Path::new("output/book1/image12.jpg");
     let prefix = path.parent().unwrap();
     std::fs::create_dir_all(prefix).expect("Cannot create all the parents");
     //Image
@@ -81,9 +81,11 @@ fn main() {
     });
     let material_left = Rc::new(Metal {
         albedo: Color { e: (0.8, 0.8, 0.8) },
+        fuzz: 0.3,
     });
     let material_right = Rc::new(Metal {
         albedo: Color { e: (0.8, 0.6, 0.2) },
+        fuzz: 1.0,
     });
 
     world.add(Box::new(Sphere {
