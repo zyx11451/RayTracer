@@ -32,7 +32,7 @@ fn ray_color(r: Ray, world: &mut HittableList, depth: i32) -> Color {
     }
     if world.hit(r, 0.001, INFINITY, &mut rec) {
         let target: Point3 = rec.p + rec.normal + random_in_unit_sphere();
-        return mul_num(
+        mul_num(
             ray_color(
                 Ray {
                     orig: (rec.p),
@@ -42,7 +42,7 @@ fn ray_color(r: Ray, world: &mut HittableList, depth: i32) -> Color {
                 depth - 1,
             ),
             0.5,
-        );
+        )
     } else {
         let unit_direction: Vec3 = r.dir.unit_vector();
         let t: f64 = 0.5 * (unit_direction.e.1 + 1.0);
