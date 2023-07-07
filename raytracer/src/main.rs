@@ -57,7 +57,7 @@ fn ray_color(r: Ray, world: &mut HittableList, depth: i32) -> Color {
 }
 fn main() {
     //
-    let path = std::path::Path::new("output/book1/image18.jpg");
+    let path = std::path::Path::new("output/book1/image19.jpg");
     let prefix = path.parent().unwrap();
     std::fs::create_dir_all(prefix).expect("Cannot create all the parents");
     //Image
@@ -122,16 +122,18 @@ fn main() {
         mat_ptr: material_right,
     }));
     //Camera
+    let lookfrom: Point3 = Point3 { e: (3.0, 3.0, 2.0) };
+    let lookat: Point3 = Point3 {
+        e: (0.0, 0.0, -1.0),
+    };
     let cam = Camera::new_cam(
-        Point3 {
-            e: (-2.0, 2.0, 1.0),
-        },
-        Point3 {
-            e: (0.0, 0.0, -1.0),
-        },
+        lookfrom,
+        lookat,
         Vec3 { e: (0.0, 1.0, 0.0) },
         20.0,
         aspect_ratio,
+        2.0,
+        (lookfrom - lookat).length(),
     );
     //Render
     for j in (0..height).rev() {

@@ -1,4 +1,5 @@
 use crate::{
+    randoms::random_in_unit_disk,
     ray::Ray,
     vec3::{mul_num, mul_vec_cross, Point3, Vec3},
 };
@@ -8,6 +9,10 @@ pub struct Camera {
     lower_left_corner: Point3,
     horizonal: Vec3,
     vertical: Vec3,
+    u: Vec3,
+    v: Vec3,
+    //w: Vec3,
+    lens_radius: f64,
 }
 impl Camera {
     pub fn new() -> Self {
@@ -33,6 +38,10 @@ impl Camera {
             lower_left_corner: lower_left_corner_,
             horizonal: horizonal_,
             vertical: vertical_,
+            u: Vec3::new(),
+            v: Vec3::new(),
+            //w: Vec3::new(),
+            lens_radius: 0.0,
         }
     }
     pub fn new_cam(
@@ -41,6 +50,8 @@ impl Camera {
         vup: Vec3,
         vfov: f64,
         aspect_ratio: f64,
+        aperture: f64,
+        focus_dist: f64,
     ) -> Self {
         let theta = vfov.to_radians();
         let h = (theta / 2.0).tan();
@@ -50,21 +61,28 @@ impl Camera {
         let u = mul_vec_cross(vup, w).unit_vector();
         let v = mul_vec_cross(w, u);
         let origin_ = lookfrom;
-        let horizonal_ = u * viewport_width;
-        let vertical_ = v * viewport_height;
-        let lower_left_corner_ = origin_ - horizonal_ / 2.0 - vertical_ / 2.0 - w;
+        let horizonal_ = u * viewport_width * focus_dist;
+        let vertical_ = v * viewport_height * focus_dist;
+        let lower_left_corner_ = origin_ - horizonal_ / 2.0 - vertical_ / 2.0 - w * focus_dist;
         Self {
             origin: origin_,
             lower_left_corner: lower_left_corner_,
             horizonal: horizonal_,
             vertical: vertical_,
+            //w: w,
+            u: u,
+            v: v,
+            lens_radius: aperture / 2.0,
         }
     }
     pub fn get_ray(&self, s: f64, t: f64) -> Ray {
+        let rd = random_in_unit_disk() * self.lens_radius;
+        let offset = self.u * rd.e.0 + self.v * rd.e.1;
         Ray {
-            orig: (self.origin),
+            orig: (self.origin + offset),
             dir: (self.lower_left_corner + mul_num(self.horizonal, s) + mul_num(self.vertical, t)
-                - self.origin),
+                - self.origin
+                - offset),
         }
     }
 }

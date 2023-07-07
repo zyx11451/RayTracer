@@ -51,3 +51,17 @@ pub fn random_in_semi_sphere(normal: Vec3) -> Vec3 {
         -in_unit_sphere
     }
 }
+pub fn random_in_unit_disk() -> Vec3 {
+    let mut p = Vec3 {
+        e: (random_double(-1.0, 1.0), random_double(-1.0, 1.0), 0.0),
+    };
+    loop {
+        if p.length_square() < 1.0 {
+            break;
+        }
+        p = Vec3 {
+            e: (random_double(-1.0, 1.0), random_double(-1.0, 1.0), 0.0),
+        };
+    }
+    p
+}
