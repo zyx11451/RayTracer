@@ -1,5 +1,5 @@
 use crate::randoms::{random_in_unit_sphere, random_unit_vec};
-use crate::vec3::{mul_vec_dot, reflect, Color, Vec3};
+use crate::vec3::{mul_vec_dot, reflect, refract, Color, Vec3};
 
 use crate::{hittable::HitRecord, ray::Ray};
 
@@ -54,5 +54,31 @@ impl Material for Metal {
         };
         *attenuation = self.albedo;
         mul_vec_dot(scattered.dir, rec.normal) > 0.0
+    }
+}
+pub struct Dielectric {
+    pub ir: f64,
+}
+impl Material for Dielectric {
+    fn scatter(
+        &self,
+        r_in: Ray,
+        rec: HitRecord,
+        attenuation: &mut Color,
+        scattered: &mut Ray,
+    ) -> bool {
+        *attenuation = Color { e: (1.0, 1.0, 1.0) };
+        let reflection_ratio = if rec.front_face {
+            1.0 / self.ir
+        } else {
+            self.ir
+        };
+        let unit_direction = r_in.dir.unit_vector();
+        let refracted = refract(unit_direction, rec.normal, reflection_ratio);
+        *scattered = Ray {
+            orig: rec.p,
+            dir: refracted,
+        };
+        true
     }
 }

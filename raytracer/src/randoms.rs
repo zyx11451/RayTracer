@@ -14,6 +14,13 @@ pub fn clamp(x: f64, min: f64, max: f64) -> f64 {
     }
     x
 }
+pub fn min(x: f64, y: f64) -> f64 {
+    if x < y {
+        x
+    } else {
+        y
+    }
+}
 pub fn random_vec(min: f64, max: f64) -> Vec3 {
     Vec3 {
         e: (

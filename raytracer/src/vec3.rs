@@ -1,5 +1,5 @@
+use crate::randoms::min;
 use std::ops;
-
 #[derive(Debug, Clone, Copy)]
 pub struct Vec3 {
     pub e: (f64, f64, f64),
@@ -42,6 +42,12 @@ pub fn mul_num(lhs: Vec3, rhs: f64) -> Vec3 {
 }
 pub fn reflect(v: Vec3, n: Vec3) -> Vec3 {
     v - mul_num(n, 2.0 * mul_vec_dot(v, n))
+}
+pub fn refract(uv: Vec3, n: Vec3, etai_over_etat: f64) -> Vec3 {
+    let cos_theta = min(mul_vec_dot(-uv, n), 1.0);
+    let r_out_prep = (uv + n * cos_theta) * etai_over_etat;
+    let r_out_parallel = n * (-((1.0 - r_out_prep.length_square()).abs().sqrt()));
+    r_out_prep + r_out_parallel
 }
 fn div_vec(lhs: Vec3, rhs: f64) -> Vec3 {
     mul_num(lhs, 1.0 / rhs)
