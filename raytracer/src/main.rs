@@ -9,6 +9,7 @@ use hittable::HitRecord;
 use hittable::HittableList;
 use image::{ImageBuffer, RgbImage};
 use indicatif::ProgressBar;
+use std::f64::consts::PI;
 use std::f64::INFINITY;
 use std::ops::AddAssign;
 use std::rc::Rc;
@@ -19,9 +20,9 @@ use vec3::mul_num;
 use crate::camera::Camera;
 use crate::hittable::Hittable;
 use crate::hittable::Sphere;
-use crate::material::Dielectric;
+//use crate::material::Dielectric;
 use crate::material::Lambertian;
-use crate::material::Metal;
+//use crate::material::Metal;
 use crate::randoms::random_double;
 use crate::ray::write_color;
 use crate::ray::Ray;
@@ -56,7 +57,7 @@ fn ray_color(r: Ray, world: &mut HittableList, depth: i32) -> Color {
 }
 fn main() {
     //
-    let path = std::path::Path::new("output/book1/image15.jpg");
+    let path = std::path::Path::new("output/book1/image16.jpg");
     let prefix = path.parent().unwrap();
     std::fs::create_dir_all(prefix).expect("Cannot create all the parents");
     //Image
@@ -74,7 +75,7 @@ fn main() {
     };
     //World
     let mut world: HittableList = HittableList::new();
-    let material_ground = Rc::new(Lambertian {
+    /*let material_ground = Rc::new(Lambertian {
         albedo: Color { e: (0.8, 0.8, 0.0) },
     });
     let material_center = Rc::new(Lambertian {
@@ -84,9 +85,25 @@ fn main() {
     let material_right = Rc::new(Metal {
         albedo: Color { e: (0.8, 0.6, 0.2) },
         fuzz: 0.0,
+    });*/
+    let r = (PI / 4.0).cos();
+    let material_left = Rc::new(Lambertian {
+        albedo: Color { e: (0.0, 0.0, 1.0) },
     });
-
+    let material_right = Rc::new(Lambertian {
+        albedo: Color { e: (1.0, 0.0, 0.0) },
+    });
     world.add(Box::new(Sphere {
+        center: Point3 { e: (-r, 0.0, -1.0) },
+        radius: r,
+        mat_ptr: material_left,
+    }));
+    world.add(Box::new(Sphere {
+        center: Point3 { e: (r, 0.0, -1.0) },
+        radius: r,
+        mat_ptr: material_right,
+    }));
+    /*world.add(Box::new(Sphere {
         center: Point3 {
             e: (0.0, 0.0, -1.0),
         },
@@ -120,9 +137,10 @@ fn main() {
         },
         radius: 0.5,
         mat_ptr: material_right,
-    }));
+    }));*/
     //Camera
-    let cam = Camera::new();
+    //let cam = Camera::new();
+    let cam = Camera::new_cam(90.0, aspect_ratio);
     //Render
     for j in (0..height).rev() {
         for i in 0..width {

@@ -35,6 +35,32 @@ impl Camera {
             vertical: vertical_,
         }
     }
+    pub fn new_cam(vfov: f64, aspect_ratio: f64) -> Self {
+        let theta = vfov.to_radians();
+        let h = (theta / 2.0).tan();
+        let viewport_height = 2.0 * h;
+        let viewport_width = aspect_ratio * viewport_height;
+        let focal_length = 1.0;
+        let origin_ = Point3 { e: (0.0, 0.0, 0.0) };
+        let horizonal_ = Vec3 {
+            e: (viewport_width, 0.0, 0.0),
+        };
+        let vertical_ = Vec3 {
+            e: (0.0, viewport_height, 0.0),
+        };
+        let lower_left_corner_ = origin_
+            - horizonal_ / 2.0
+            - vertical_ / 2.0
+            - Vec3 {
+                e: (0.0, 0.0, focal_length),
+            };
+        Self {
+            origin: origin_,
+            lower_left_corner: lower_left_corner_,
+            horizonal: horizonal_,
+            vertical: vertical_,
+        }
+    }
     pub fn get_ray(&self, u: f64, v: f64) -> Ray {
         Ray {
             orig: (self.origin),
