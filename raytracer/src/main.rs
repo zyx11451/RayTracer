@@ -8,7 +8,7 @@ use hittable::HitRecord;
 use hittable::HittableList;
 use image::{ImageBuffer, RgbImage};
 use indicatif::ProgressBar;
-use randoms::random_unit_vec;
+use randoms::random_in_semi_sphere;
 use std::f64::INFINITY;
 use std::ops::AddAssign;
 use std::{fs::File, process::exit};
@@ -31,7 +31,7 @@ fn ray_color(r: Ray, world: &mut HittableList, depth: i32) -> Color {
         return Color { e: (0.0, 0.0, 0.0) };
     }
     if world.hit(r, 0.001, INFINITY, &mut rec) {
-        let target: Point3 = rec.p + rec.normal + random_unit_vec();
+        let target: Point3 = rec.p + rec.normal + random_in_semi_sphere(rec.normal);
         mul_num(
             ray_color(
                 Ray {
@@ -51,7 +51,7 @@ fn ray_color(r: Ray, world: &mut HittableList, depth: i32) -> Color {
 }
 fn main() {
     //
-    let path = std::path::Path::new("output/book1/image9.jpg");
+    let path = std::path::Path::new("output/book1/image10.jpg");
     let prefix = path.parent().unwrap();
     std::fs::create_dir_all(prefix).expect("Cannot create all the parents");
     //Image
