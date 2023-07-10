@@ -10,7 +10,7 @@ use std::sync::Arc;
 use std::vec::Vec;
 
 pub trait Hittable {
-    fn hit(&self, r: Ray, t_min: f64, t_max: f64, rec: &mut HitRecord) -> bool;
+    fn hit(&self, r: &Ray, t_min: f64, t_max: f64, rec: &mut HitRecord) -> bool;
 }
 #[derive(Clone)]
 pub struct HitRecord {
@@ -21,7 +21,7 @@ pub struct HitRecord {
     pub mat_ptr: Arc<dyn Material>,
 }
 impl HitRecord {
-    pub fn set_face_normal(&mut self, r: Ray, outward_normal: Vec3) {
+    pub fn set_face_normal(&mut self, r: &Ray, outward_normal: Vec3) {
         self.front_face = mul_vec_dot(r.dir, outward_normal) < 0.0;
         if self.front_face {
             self.normal = outward_normal;
@@ -72,7 +72,7 @@ impl Default for HittableList {
     }
 }
 impl Hittable for HittableList {
-    fn hit(&self, r: Ray, t_min: f64, t_max: f64, rec: &mut HitRecord) -> bool {
+    fn hit(&self, r: &Ray, t_min: f64, t_max: f64, rec: &mut HitRecord) -> bool {
         let mut temp_rec: HitRecord = HitRecord::new();
         let mut hit_anything: bool = false;
         let mut closest_so_far = t_max;
@@ -94,7 +94,7 @@ pub struct Sphere {
     pub mat_ptr: Arc<dyn Material>,
 }
 impl Hittable for Sphere {
-    fn hit(&self, r: Ray, t_min: f64, t_max: f64, rec: &mut HitRecord) -> bool {
+    fn hit(&self, r: &Ray, t_min: f64, t_max: f64, rec: &mut HitRecord) -> bool {
         let oc: Vec3 = r.orig - self.center;
         let a = r.dir.length_square();
         let half_b = mul_vec_dot(oc, r.dir);

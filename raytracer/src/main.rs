@@ -35,7 +35,7 @@ use crate::vec3::Color;
 use crate::vec3::Point3;
 use crate::vec3::Vec3;
 
-fn ray_color(r: Ray, world: &HittableList, depth: i32) -> Color {
+fn ray_color(r: &Ray, world: &HittableList, depth: i32) -> Color {
     let mut rec: HitRecord = HitRecord::new();
     if depth <= 0 {
         return Color { e: (0.0, 0.0, 0.0) };
@@ -50,7 +50,7 @@ fn ray_color(r: Ray, world: &HittableList, depth: i32) -> Color {
             .mat_ptr
             .scatter(r, rec.clone(), &mut attenuation, &mut scattered)
         {
-            attenuation * ray_color(scattered, world, depth - 1)
+            attenuation * ray_color(&scattered, world, depth - 1)
         } else {
             Color { e: (0.0, 0.0, 0.0) }
         }
@@ -160,7 +160,7 @@ fn main() {
                         let v = (1.0 * ((height - j - 1) as f64) + random_double(0.0, 1.0))
                             / (height - 1) as f64;
                         let r: Ray = cam.get_ray(u, v);
-                        pixel_color.add_assign(ray_color(r, b_in_thread.as_ref(), max_depth));
+                        pixel_color.add_assign(ray_color(&r, b_in_thread.as_ref(), max_depth));
                         s += 1;
                     }
                     let mut img1 = im_in_thread.lock().unwrap();

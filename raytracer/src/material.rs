@@ -6,7 +6,7 @@ use crate::{hittable::HitRecord, ray::Ray};
 pub trait Material {
     fn scatter(
         &self,
-        r_in: Ray,
+        r_in: &Ray,
         rec: HitRecord,
         attenuation: &mut Color,
         scattered: &mut Ray,
@@ -18,7 +18,7 @@ pub struct Lambertian {
 impl Material for Lambertian {
     fn scatter(
         &self,
-        _r_in: Ray,
+        _r_in: &Ray,
         rec: HitRecord,
         attenuation: &mut Color,
         scattered: &mut Ray,
@@ -42,7 +42,7 @@ pub struct Metal {
 impl Material for Metal {
     fn scatter(
         &self,
-        r_in: Ray,
+        r_in: &Ray,
         rec: HitRecord,
         attenuation: &mut Color,
         scattered: &mut Ray,
@@ -67,7 +67,7 @@ pub fn reflectance(cosine: f64, ref_idx: f64) -> f64 {
 impl Material for Dielectric {
     fn scatter(
         &self,
-        r_in: Ray,
+        r_in: &Ray,
         rec: HitRecord,
         attenuation: &mut Color,
         scattered: &mut Ray,
