@@ -5,7 +5,8 @@ use super::ray::Ray;
 use super::vec3::mul_vec_dot;
 use super::vec3::Point3;
 use super::vec3::Vec3;
-use std::rc::Rc;
+//use std::rc::Rc;
+use std::sync::Arc;
 use std::vec::Vec;
 
 pub trait Hittable {
@@ -17,7 +18,7 @@ pub struct HitRecord {
     pub normal: Vec3,
     pub t: f64,
     pub front_face: bool,
-    pub mat_ptr: Rc<dyn Material>,
+    pub mat_ptr: Arc<dyn Material>,
 }
 impl HitRecord {
     pub fn set_face_normal(&mut self, r: Ray, outward_normal: Vec3) {
@@ -34,7 +35,7 @@ impl HitRecord {
             normal: (Vec3::new()),
             t: (0.0),
             front_face: (true),
-            mat_ptr: (Rc::new(Lambertian {
+            mat_ptr: (Arc::new(Lambertian {
                 albedo: (Vec3 { e: (0.0, 0.0, 0.0) }),
             })),
         }
@@ -45,11 +46,14 @@ impl Default for HitRecord {
         Self::new()
     }
 }
+#[derive(Clone)]
 pub struct HittableList {
-    pub objects: Vec<Box<dyn Hittable>>,
+    pub objects: Vec<Arc<dyn Hittable>>,
 }
+unsafe impl Send for HittableList {}
+unsafe impl Sync for HittableList {}
 impl HittableList {
-    pub fn add(&mut self, object: Box<dyn Hittable>) {
+    pub fn add(&mut self, object: Arc<dyn Hittable>) {
         self.objects.push(object);
     }
     pub fn clear(&mut self) {
@@ -61,6 +65,7 @@ impl HittableList {
         }
     }
 }
+
 impl Default for HittableList {
     fn default() -> Self {
         Self::new()
@@ -86,7 +91,7 @@ impl Hittable for HittableList {
 pub struct Sphere {
     pub center: Point3,
     pub radius: f64,
-    pub mat_ptr: Rc<dyn Material>,
+    pub mat_ptr: Arc<dyn Material>,
 }
 impl Hittable for Sphere {
     fn hit(&self, r: Ray, t_min: f64, t_max: f64, rec: &mut HitRecord) -> bool {
