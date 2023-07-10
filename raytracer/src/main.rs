@@ -136,7 +136,7 @@ fn main() {
         10.0,
     );
     //Render
-    let thread_num = 12;
+    let thread_num = 16; //必须是图像高度的因数
     let main_progress = Arc::new(Mutex::new(MultiProgress::new()));
     let thread_height = height / thread_num;
     let b = Arc::new(world);
@@ -150,7 +150,7 @@ fn main() {
         let b_in_thread = b.clone();
         let im_in_thread = im.clone();
         let each_thread = thread::spawn(move || {
-            let max_h = (p + 1) * thread_height.min(height);
+            let max_h = ((p + 1) * thread_height).min(height);
             for j in (p * thread_height..max_h).rev() {
                 for i in 0..width {
                     let mut pixel_color: Color = Color { e: (0.0, 0.0, 0.0) };
