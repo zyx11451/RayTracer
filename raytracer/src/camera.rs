@@ -1,5 +1,5 @@
 use crate::{
-    randoms::random_in_unit_disk,
+    randoms::{random_in_unit_disk, random_double},
     ray::Ray,
     vec3::{mul_num, mul_vec_cross, Point3, Vec3},
 };
@@ -13,6 +13,8 @@ pub struct Camera {
     v: Vec3,
     //w: Vec3,
     lens_radius: f64,
+    time0: f64,
+    time1: f64,
 }
 impl Camera {
     pub fn new() -> Self {
@@ -42,6 +44,8 @@ impl Camera {
             v: Vec3::new(),
             //w: Vec3::new(),
             lens_radius: 0.0,
+            time0: 0.0,
+            time1: 1.0
         }
     }
     pub fn new_cam(
@@ -52,6 +56,8 @@ impl Camera {
         aspect_ratio: f64,
         aperture: f64,
         focus_dist: f64,
+        _time0: f64,
+        _time1: f64,
     ) -> Self {
         let theta = vfov.to_radians();
         let h = (theta / 2.0).tan();
@@ -73,6 +79,8 @@ impl Camera {
             u: u_,
             v: v_,
             lens_radius: aperture / 2.0,
+            time0:_time0,
+            time1:_time1
         }
     }
     pub fn get_ray(&self, s: f64, t: f64) -> Ray {
@@ -83,6 +91,7 @@ impl Camera {
             dir: (self.lower_left_corner + mul_num(self.horizonal, s) + mul_num(self.vertical, t)
                 - self.origin
                 - offset),
+            time: random_double(self.time0, self.time1),
         }
     }
 }

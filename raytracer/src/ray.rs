@@ -24,6 +24,7 @@ pub fn write_color(tar: Color, samples_per_pixel: u32) -> image::Rgb<u8> {
 pub struct Ray {
     pub orig: Point3,
     pub dir: Vec3,
+    pub time: f64,
 }
 impl Ray {
     pub fn at(&self, t: f64) -> Point3 {

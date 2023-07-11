@@ -44,6 +44,7 @@ fn ray_color(r: &Ray, world: &HittableList, depth: i32) -> Color {
         let mut scattered: Ray = Ray {
             orig: (Vec3::new()),
             dir: (Vec3::new()),
+            time: 0.0,
         };
         let mut attenuation: Color = Color::new();
         if rec
@@ -62,15 +63,15 @@ fn ray_color(r: &Ray, world: &HittableList, depth: i32) -> Color {
 }
 fn main() {
     //
-    let path = std::path::Path::new("output/book1/test1.jpg");
+    let path = std::path::Path::new("output/book2/image1.jpg");
     let prefix = path.parent().unwrap();
     std::fs::create_dir_all(prefix).expect("Cannot create all the parents");
     //Image
-    let aspect_ratio: f64 = 3.0 / 2.0;
-    let width = 1200;
+    let aspect_ratio: f64 = 16.0 / 9.0;
+    let width = 400;
     let height = ((width as f64) / aspect_ratio) as u32;
     let quality = 100;
-    let samples_per_pixel = 500;
+    let samples_per_pixel = 100;
     let max_depth = 50;
     let img: RgbImage = ImageBuffer::new(width, height);
     //World
@@ -134,9 +135,11 @@ fn main() {
         aspect_ratio,
         0.1,
         10.0,
+        0.0,
+        1.0
     );
     //Render
-    let thread_num = 16; //必须是图像高度的因数
+    let thread_num = 15; //必须是图像高度的因数
     let main_progress = Arc::new(Mutex::new(MultiProgress::new()));
     let thread_height = height / thread_num;
     let b = Arc::new(world);
