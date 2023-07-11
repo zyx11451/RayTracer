@@ -3,6 +3,15 @@ use crate::{
     ray::Ray,
     vec3::{mul_num, mul_vec_cross, Point3, Vec3},
 };
+pub struct NewCamMessage {
+    //为了减少变量数目
+    pub vfov: f64,
+    pub _aspect_ratio: f64,
+    pub aperture: f64,
+    pub focus_dist: f64,
+    pub _time0: f64,
+    pub _time1: f64,
+}
 #[derive(Clone, Copy)]
 pub struct Camera {
     origin: Point3,
@@ -48,28 +57,18 @@ impl Camera {
             time1: 1.0,
         }
     }
-    pub fn new_cam(
-        lookfrom: Point3,
-        lookat: Point3,
-        vup: Vec3,
-        vfov: f64,
-        aspect_ratio: f64,
-        aperture: f64,
-        focus_dist: f64,
-        _time0: f64,
-        _time1: f64,
-    ) -> Self {
-        let theta = vfov.to_radians();
+    pub fn new_cam(lookfrom: Point3, lookat: Point3, vup: Vec3, m: NewCamMessage) -> Self {
+        let theta = m.vfov.to_radians();
         let h = (theta / 2.0).tan();
         let viewport_height = 2.0 * h;
-        let viewport_width = aspect_ratio * viewport_height;
+        let viewport_width = m._aspect_ratio * viewport_height;
         let w_ = (lookfrom - lookat).unit_vector();
         let u_ = mul_vec_cross(vup, w_).unit_vector();
         let v_ = mul_vec_cross(w_, u_);
         let origin_ = lookfrom;
-        let horizonal_ = u_ * viewport_width * focus_dist;
-        let vertical_ = v_ * viewport_height * focus_dist;
-        let lower_left_corner_ = origin_ - horizonal_ / 2.0 - vertical_ / 2.0 - w_ * focus_dist;
+        let horizonal_ = u_ * viewport_width * m.focus_dist;
+        let vertical_ = v_ * viewport_height * m.focus_dist;
+        let lower_left_corner_ = origin_ - horizonal_ / 2.0 - vertical_ / 2.0 - w_ * m.focus_dist;
         Self {
             origin: origin_,
             lower_left_corner: lower_left_corner_,
@@ -78,9 +77,9 @@ impl Camera {
             //w: w,
             u: u_,
             v: v_,
-            lens_radius: aperture / 2.0,
-            time0: _time0,
-            time1: _time1,
+            lens_radius: m.aperture / 2.0,
+            time0: m._time0,
+            time1: m._time1,
         }
     }
     pub fn get_ray(&self, s: f64, t: f64) -> Ray {

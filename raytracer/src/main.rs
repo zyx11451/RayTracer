@@ -22,6 +22,7 @@ use vec3::mul_num;
 //use vec3::mul_vec_dot;
 
 use crate::camera::Camera;
+use crate::camera::NewCamMessage;
 use crate::hittable::Hittable;
 //use crate::hittable::Sphere;
 //use crate::material::Dielectric;
@@ -131,12 +132,14 @@ fn main() {
         lookfrom,
         lookat,
         Vec3 { e: (0.0, 1.0, 0.0) },
-        20.0,
-        aspect_ratio,
-        0.1,
-        10.0,
-        0.0,
-        1.0,
+        NewCamMessage {
+            vfov: 20.0,
+            _aspect_ratio: aspect_ratio,
+            aperture: 0.1,
+            focus_dist: 10.0,
+            _time0: 0.0,
+            _time1: 1.0,
+        },
     );
     //Render
     let thread_num = 15; //必须是图像高度的因数
