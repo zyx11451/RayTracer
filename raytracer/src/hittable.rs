@@ -121,20 +121,24 @@ impl Hittable for Sphere {
         true
     }
 }
-pub struct MovingSphere{
-    pub center0:Point3,
-    pub center1:Point3,
-    pub time0:f64,
-    pub time1:f64,
-    pub radius:f64,
+pub struct MovingSphere {
+    pub center0: Point3,
+    pub center1: Point3,
+    pub time0: f64,
+    pub time1: f64,
+    pub radius: f64,
     pub mat_ptr: Arc<dyn Material>,
 }
-impl MovingSphere{
-    pub fn center(&self,time:f64) ->Point3{
-        self.center0+mul_num(self.center1-self.center0,(time-self.time0)/(self.time1-self.time0))
+impl MovingSphere {
+    pub fn center(&self, time: f64) -> Point3 {
+        self.center0
+            + mul_num(
+                self.center1 - self.center0,
+                (time - self.time0) / (self.time1 - self.time0),
+            )
     }
 }
-impl  Hittable for MovingSphere {
+impl Hittable for MovingSphere {
     fn hit(&self, r: &Ray, t_min: f64, t_max: f64, rec: &mut HitRecord) -> bool {
         let oc: Vec3 = r.orig - self.center(r.time);
         let a = r.dir.length_square();

@@ -1,5 +1,5 @@
 use crate::{
-    randoms::{random_in_unit_disk, random_double},
+    randoms::{random_double, random_in_unit_disk},
     ray::Ray,
     vec3::{mul_num, mul_vec_cross, Point3, Vec3},
 };
@@ -45,7 +45,7 @@ impl Camera {
             //w: Vec3::new(),
             lens_radius: 0.0,
             time0: 0.0,
-            time1: 1.0
+            time1: 1.0,
         }
     }
     pub fn new_cam(
@@ -79,8 +79,8 @@ impl Camera {
             u: u_,
             v: v_,
             lens_radius: aperture / 2.0,
-            time0:_time0,
-            time1:_time1
+            time0: _time0,
+            time1: _time1,
         }
     }
     pub fn get_ray(&self, s: f64, t: f64) -> Ray {

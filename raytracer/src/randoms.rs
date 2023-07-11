@@ -1,6 +1,6 @@
 use crate::{
     hittable::HittableList,
-    hittable::{Sphere, MovingSphere},
+    hittable::{MovingSphere, Sphere},
     material::{Dielectric, Lambertian, Metal},
     vec3::{mul_vec_dot, Color, Point3, Vec3},
 };
@@ -95,13 +95,16 @@ pub fn random_scene() -> HittableList {
             if (center_ - Point3 { e: (4.0, 0.2, 0.0) }).length() > 0.9 {
                 if choose_mat < 0.8 {
                     let albedo_ = random_vec(0.0, 1.0) * random_vec(0.0, 1.0);
-                    let center2 =center_+Vec3 { e: (0.0,random_double(0.0, 0.5),0.0) };
+                    let center2 = center_
+                        + Vec3 {
+                            e: (0.0, random_double(0.0, 0.5), 0.0),
+                        };
                     let sphere_material = Arc::new(Lambertian { albedo: albedo_ });
                     world.add(Arc::new(MovingSphere {
                         center0: center_,
-                        center1:center2,
+                        center1: center2,
                         time0: 0.0,
-                        time1:1.0,
+                        time1: 1.0,
                         radius: 0.2,
                         mat_ptr: sphere_material,
                     }));
