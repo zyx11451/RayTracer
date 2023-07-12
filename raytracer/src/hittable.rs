@@ -1,3 +1,5 @@
+use crate::aabb::surrounding_box;
+use crate::aabb::AABB;
 use crate::material::Lambertian;
 use crate::material::Material;
 use crate::vec3::mul_num;
@@ -12,6 +14,7 @@ use std::vec::Vec;
 
 pub trait Hittable {
     fn hit(&self, r: &Ray, t_min: f64, t_max: f64, rec: &mut HitRecord) -> bool;
+    fn bounding_box(&self, time0: f64, time1: f64, output_box: &mut AABB) -> bool;
 }
 #[derive(Clone)]
 pub struct HitRecord {
@@ -86,6 +89,28 @@ impl Hittable for HittableList {
         }
         hit_anything
     }
+    fn bounding_box(&self, time0: f64, time1: f64, output_box: &mut AABB) -> bool {
+        if self.objects.is_empty() {
+            return false;
+        }
+        let mut temp_box = AABB {
+            minimum: Vec3::new(),
+            maximum: Vec3::new(),
+        };
+        let mut first_box: bool = true;
+        for object in &self.objects {
+            if !(object.bounding_box(time0, time1, &mut temp_box)) {
+                return false;
+            }
+            *output_box = if first_box {
+                temp_box
+            } else {
+                surrounding_box(&output_box, &temp_box)
+            };
+            first_box = false;
+        }
+        true
+    }
 }
 
 #[derive(Clone)]
@@ -118,6 +143,19 @@ impl Hittable for Sphere {
         let outward_normal = (rec.p - self.center) / self.radius;
         rec.set_face_normal(r, outward_normal);
         rec.mat_ptr = self.mat_ptr.clone();
+        true
+    }
+    fn bounding_box(&self, _time0: f64, _time1: f64, output_box: &mut AABB) -> bool {
+        *output_box = AABB {
+            minimum: self.center
+                - Vec3 {
+                    e: (self.radius, self.radius, self.radius),
+                },
+            maximum: self.center
+                + Vec3 {
+                    e: (self.radius, self.radius, self.radius),
+                },
+        };
         true
     }
 }
@@ -162,6 +200,30 @@ impl Hittable for MovingSphere {
         let outward_normal = (rec.p - self.center(r.time)) / self.radius;
         rec.set_face_normal(r, outward_normal);
         rec.mat_ptr = self.mat_ptr.clone();
+        true
+    }
+    fn bounding_box(&self, time0: f64, time1: f64, output_box: &mut AABB) -> bool {
+        let box0 = AABB {
+            minimum: self.center(time0)
+                - Vec3 {
+                    e: (self.radius, self.radius, self.radius),
+                },
+            maximum: self.center(time0)
+                + Vec3 {
+                    e: (self.radius, self.radius, self.radius),
+                },
+        };
+        let box1 = AABB {
+            minimum: self.center(time1)
+                - Vec3 {
+                    e: (self.radius, self.radius, self.radius),
+                },
+            maximum: self.center(time1)
+                + Vec3 {
+                    e: (self.radius, self.radius, self.radius),
+                },
+        };
+        *output_box = surrounding_box(&box0, &box1);
         true
     }
 }

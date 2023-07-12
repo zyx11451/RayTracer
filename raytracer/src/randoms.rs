@@ -26,6 +26,13 @@ pub fn min(x: f64, y: f64) -> f64 {
         y
     }
 }
+pub fn max(x: f64, y: f64) -> f64 {
+    if x > y {
+        x
+    } else {
+        y
+    }
+}
 pub fn random_vec(min: f64, max: f64) -> Vec3 {
     Vec3 {
         e: (
@@ -157,4 +164,7 @@ pub fn random_scene() -> HittableList {
         mat_ptr: material3,
     }));
     world
+}
+pub fn random_int(min: i32, max: i32) -> i32 {
+    (random_double(min as f64, (max + 1) as f64)) as i32
 }
