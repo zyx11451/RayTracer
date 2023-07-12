@@ -1,6 +1,7 @@
 use crate::aabb::surrounding_box;
 use crate::aabb::AABB;
-use crate::material::Lambertian;
+use crate::material::Dielectric;
+//use crate::material::Lambertian;
 use crate::material::Material;
 use crate::vec3::mul_num;
 
@@ -8,6 +9,7 @@ use super::ray::Ray;
 use super::vec3::mul_vec_dot;
 use super::vec3::Point3;
 use super::vec3::Vec3;
+use std::f64::consts::PI;
 //use std::rc::Rc;
 use std::sync::Arc;
 use std::vec::Vec;
@@ -23,6 +25,8 @@ pub struct HitRecord {
     pub t: f64,
     pub front_face: bool,
     pub mat_ptr: Arc<dyn Material>,
+    pub u: f64,
+    pub v: f64,
 }
 impl HitRecord {
     pub fn set_face_normal(&mut self, r: &Ray, outward_normal: Vec3) {
@@ -39,9 +43,9 @@ impl HitRecord {
             normal: (Vec3::new()),
             t: (0.0),
             front_face: (true),
-            mat_ptr: (Arc::new(Lambertian {
-                albedo: (Vec3 { e: (0.0, 0.0, 0.0) }),
-            })),
+            mat_ptr: (Arc::new(Dielectric { ir: 0.0 })),
+            u: 0.0,
+            v: 0.0,
         }
     }
 }
@@ -119,6 +123,14 @@ pub struct Sphere {
     pub radius: f64,
     pub mat_ptr: Arc<dyn Material>,
 }
+impl Sphere {
+    pub fn get_sphere_uv(&self, p: &Point3, u: &mut f64, v: &mut f64) {
+        let theda = (-p.e.1).acos();
+        let phi = (-p.e.2).atan2(p.e.0) + PI;
+        *u = phi / (2.0 * PI);
+        *v = theda / PI;
+    }
+}
 impl Hittable for Sphere {
     fn hit(&self, r: &Ray, t_min: f64, t_max: f64, rec: &mut HitRecord) -> bool {
         let oc: Vec3 = r.orig - self.center;
@@ -142,6 +154,7 @@ impl Hittable for Sphere {
         rec.p = r.at(rec.t);
         let outward_normal = (rec.p - self.center) / self.radius;
         rec.set_face_normal(r, outward_normal);
+        self.get_sphere_uv(&outward_normal, &mut rec.u, &mut rec.v);
         rec.mat_ptr = self.mat_ptr.clone();
         true
     }

@@ -1,4 +1,7 @@
+use std::sync::Arc;
+
 use crate::randoms::{min, random_double, random_in_unit_sphere, random_unit_vec};
+use crate::texture::Texture;
 use crate::vec3::{mul_vec_dot, reflect, refract, Color, Vec3};
 
 use crate::{hittable::HitRecord, ray::Ray};
@@ -13,7 +16,7 @@ pub trait Material {
     ) -> bool;
 }
 pub struct Lambertian {
-    pub albedo: Color,
+    pub albedo: Arc<dyn Texture>,
 }
 impl Material for Lambertian {
     fn scatter(
@@ -32,7 +35,7 @@ impl Material for Lambertian {
             dir: (scatter_direction),
             time: r_in.time,
         };
-        *attenuation = self.albedo;
+        *attenuation = self.albedo.value(rec.u, rec.v, &rec.p);
         true
     }
 }

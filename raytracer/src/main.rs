@@ -5,6 +5,7 @@ pub mod hittable;
 pub mod material;
 pub mod randoms;
 pub mod ray;
+pub mod texture;
 pub mod vec3;
 use console::style;
 use hittable::HitRecord;

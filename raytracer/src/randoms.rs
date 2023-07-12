@@ -2,6 +2,7 @@ use crate::{
     hittable::HittableList,
     hittable::{MovingSphere, Sphere},
     material::{Dielectric, Lambertian, Metal},
+    texture::{CheckerTexture, SolidColor},
     vec3::{mul_vec_dot, Color, Point3, Vec3},
 };
 use rand::Rng;
@@ -79,9 +80,11 @@ pub fn random_in_unit_disk() -> Vec3 {
 }
 pub fn random_scene() -> HittableList {
     let mut world = HittableList::new();
-    let ground_material = Arc::new(Lambertian {
-        albedo: Color { e: (0.5, 0.5, 0.5) },
+    let checker = Arc::new(CheckerTexture {
+        even: Arc::new(SolidColor::new(Color { e: (0.2, 0.3, 0.1) })),
+        odd: Arc::new(SolidColor::new(Color { e: (0.9, 0.9, 0.9) })),
     });
+    let ground_material = Arc::new(Lambertian { albedo: checker });
     world.add(Arc::new(Sphere {
         center: Point3 {
             e: (0.0, -1000.0, 0.0),
@@ -106,7 +109,11 @@ pub fn random_scene() -> HittableList {
                         + Vec3 {
                             e: (0.0, random_double(0.0, 0.5), 0.0),
                         };
-                    let sphere_material = Arc::new(Lambertian { albedo: albedo_ });
+                    let sphere_material = Arc::new(Lambertian {
+                        albedo: Arc::new(SolidColor {
+                            color_value: albedo_,
+                        }),
+                    });
                     world.add(Arc::new(MovingSphere {
                         center0: center_,
                         center1: center2,
@@ -145,7 +152,9 @@ pub fn random_scene() -> HittableList {
         mat_ptr: material1,
     }));
     let material2 = Arc::new(Lambertian {
-        albedo: Color { e: (0.4, 0.2, 0.1) },
+        albedo: Arc::new(SolidColor {
+            color_value: Color { e: (0.4, 0.2, 0.1) },
+        }),
     });
     world.add(Arc::new(Sphere {
         center: Point3 {
