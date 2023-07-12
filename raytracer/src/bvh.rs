@@ -45,13 +45,12 @@ impl BvhNode {
         let axis = random_int(0, 2);
         let comparator = if axis == 0 {
             box_x_compare
+        } else if axis == 1 {
+            box_y_compare
         } else {
-            if axis == 1 {
-                box_y_compare
-            } else {
-                box_z_compare
-            }
+            box_z_compare
         };
+
         let object_span = end - start;
         if object_span == 1 {
             left_ = (*objects)[start as usize].clone();

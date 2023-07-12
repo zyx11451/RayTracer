@@ -105,9 +105,9 @@ fn main() {
     let max_depth = 50;
     let img: RgbImage = ImageBuffer::new(width, height);
     //World
-    let mut world: HittableList = random_scene();
+    let world: HittableList = random_scene();
     let end = world.objects.len() as u32;
-    let bvh = BvhNode::new_nodes(&mut world.objects, 0, end, 0.0, 1.0);
+    let bvh = BvhNode::new_nodes(&world.objects, 0, end, 0.0, 1.0);
     //Camera
     let lookfrom: Point3 = Point3 {
         e: (13.0, 2.0, 3.0),
@@ -153,7 +153,7 @@ fn main() {
                         let v = (1.0 * ((height - j - 1) as f64) + random_double(0.0, 1.0))
                             / (height - 1) as f64;
                         let r: Ray = cam.get_ray(u, v);
-                        pixel_color.add_assign(ray_color(&r, &bvh_a_in_thread.as_ref(), max_depth));
+                        pixel_color.add_assign(ray_color(&r, bvh_a_in_thread.as_ref(), max_depth));
                         s += 1;
                     }
                     let mut img1 = im_in_thread.lock().unwrap();
