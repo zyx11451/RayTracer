@@ -32,7 +32,7 @@ impl Hittable for BvhNode {
 }
 impl BvhNode {
     pub fn new_nodes(
-        src_objects: &Vec<Arc<dyn Hittable>>,
+        src_objects: Vec<Arc<dyn Hittable>>,
         start: u32,
         end: u32,
         time0: f64,
@@ -40,7 +40,7 @@ impl BvhNode {
     ) -> Self {
         let left_: Arc<dyn Hittable>;
         let right_: Arc<dyn Hittable>;
-        let box0_: AABB;
+
         let mut objects = src_objects.clone();
         let axis = random_int(0, 2);
         let comparator = if axis == 0 {
@@ -69,8 +69,14 @@ impl BvhNode {
             let objects_m = &mut objects[start as usize..end as usize];
             objects_m.sort_by(comparator);
             let mid = start + object_span / 2;
-            left_ = Arc::new(BvhNode::new_nodes(&objects, start, mid, time0, time1));
-            right_ = Arc::new(BvhNode::new_nodes(&objects, mid, end, time0, time1));
+            left_ = Arc::new(BvhNode::new_nodes(
+                objects.clone(),
+                start,
+                mid,
+                time0,
+                time1,
+            ));
+            right_ = Arc::new(BvhNode::new_nodes(objects, mid, end, time0, time1));
         }
         let mut box_left: AABB = AABB {
             minimum: Vec3::new(),
@@ -82,7 +88,7 @@ impl BvhNode {
         };
         left_.bounding_box(time0, time1, &mut box_left);
         right_.bounding_box(time0, time1, &mut box_right);
-        box0_ = surrounding_box(&box_left, &box_right);
+        let box0_: AABB = surrounding_box(&box_left, &box_right);
         Self {
             left: left_,
             right: right_,

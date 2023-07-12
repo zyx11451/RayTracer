@@ -107,7 +107,7 @@ fn main() {
     //World
     let world: HittableList = random_scene();
     let end = world.objects.len() as u32;
-    let bvh = BvhNode::new_nodes(&world.objects, 0, end, 0.0, 1.0);
+    let bvh = BvhNode::new_nodes(world.objects, 0, end, 0.0, 1.0);
     //Camera
     let lookfrom: Point3 = Point3 {
         e: (13.0, 2.0, 3.0),
