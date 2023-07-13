@@ -207,6 +207,7 @@ pub fn two_perlin_sphere() -> HittableList {
     let mut objects = HittableList::new();
     let pertext = Arc::new(NoiseTexture {
         noise: Perlin::new(),
+        scale: 4.0,
     });
     objects.add(Arc::new(Sphere {
         center: Point3 {
