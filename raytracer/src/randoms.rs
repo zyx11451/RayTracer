@@ -1,7 +1,7 @@
 //随机相关和场景
 use crate::{
     hittable::HittableList,
-    hittable::{MovingSphere, Sphere, XyRect, XzRect, YzRect},
+    hittable::{MovingSphere, MyBox, Sphere, XyRect, XzRect, YzRect},
     material::{Dielectric, DiffuseLight, Lambertian, Metal},
     perlin::Perlin,
     texture::{CheckerTexture, ImageTexture, NoiseTexture, SolidColor},
@@ -348,7 +348,25 @@ pub fn cornell_box() -> HittableList {
         y0: 0.0,
         y1: 555.0,
         k: 555.0,
-        mp: white,
+        mp: white.clone(),
     }));
+    objects.add(Arc::new(MyBox::new(
+        &Point3 {
+            e: (130.0, 0.0, 65.0),
+        },
+        &Point3 {
+            e: (295.0, 165.0, 230.0),
+        },
+        white.clone(),
+    )));
+    objects.add(Arc::new(MyBox::new(
+        &Point3 {
+            e: (265.0, 0.0, 295.0),
+        },
+        &Point3 {
+            e: (430.0, 330.0, 460.0),
+        },
+        white,
+    )));
     objects
 }

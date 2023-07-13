@@ -360,3 +360,80 @@ impl Hittable for YzRect {
         true
     }
 }
+pub struct MyBox {
+    pub box_min: Point3,
+    pub box_max: Point3,
+    pub sides: HittableList,
+}
+impl MyBox {
+    pub fn new(p0: &Point3, p1: &Point3, ptr: Arc<dyn Material>) -> Self {
+        let box_min_ = p0;
+        let box_max_ = p1;
+        let mut ans = MyBox {
+            box_min: *box_min_,
+            box_max: *box_max_,
+            sides: HittableList::new(),
+        };
+        ans.sides.add(Arc::new(XyRect {
+            x0: p0.e.0,
+            x1: p1.e.0,
+            y0: p0.e.1,
+            y1: p1.e.1,
+            k: p1.e.2,
+            mp: ptr.clone(),
+        }));
+        ans.sides.add(Arc::new(XyRect {
+            x0: p0.e.0,
+            x1: p1.e.0,
+            y0: p0.e.1,
+            y1: p1.e.1,
+            k: p0.e.2,
+            mp: ptr.clone(),
+        }));
+        ans.sides.add(Arc::new(XzRect {
+            x0: p0.e.0,
+            x1: p1.e.0,
+            z0: p0.e.2,
+            z1: p1.e.2,
+            k: p1.e.1,
+            mp: ptr.clone(),
+        }));
+        ans.sides.add(Arc::new(XzRect {
+            x0: p0.e.0,
+            x1: p1.e.0,
+            z0: p0.e.2,
+            z1: p1.e.2,
+            k: p0.e.1,
+            mp: ptr.clone(),
+        }));
+        ans.sides.add(Arc::new(YzRect {
+            y0: p0.e.1,
+            y1: p1.e.1,
+            z0: p0.e.2,
+            z1: p1.e.2,
+            k: p1.e.0,
+            mp: ptr.clone(),
+        }));
+        ans.sides.add(Arc::new(YzRect {
+            y0: p0.e.1,
+            y1: p1.e.1,
+            z0: p0.e.2,
+            z1: p1.e.2,
+            k: p0.e.0,
+            mp: ptr,
+        }));
+        ans
+    }
+}
+impl Hittable for MyBox {
+    fn hit(&self, r: &Ray, t_min: f64, t_max: f64, rec: &mut HitRecord) -> bool {
+        self.sides.hit(r, t_min, t_max, rec)
+    }
+    fn bounding_box(&self, _time0: f64, _time1: f64, output_box: &mut AABB) -> bool {
+        *output_box = AABB {
+            minimum: self.box_min,
+            maximum: self.box_max,
+        };
+        true
+    }
+}
