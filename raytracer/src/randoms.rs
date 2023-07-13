@@ -3,7 +3,8 @@ use crate::{
     hittable::HittableList,
     hittable::{MovingSphere, Sphere},
     material::{Dielectric, Lambertian, Metal},
-    texture::{CheckerTexture, SolidColor},
+    perlin::Perlin,
+    texture::{CheckerTexture, NoiseTexture, SolidColor},
     vec3::{mul_vec_dot, Color, Point3, Vec3},
 };
 use rand::Rng;
@@ -199,6 +200,27 @@ pub fn two_spheres() -> HittableList {
         },
         radius: 10.0,
         mat_ptr: Arc::new(Lambertian { albedo: checker }),
+    }));
+    objects
+}
+pub fn two_perlin_sphere() -> HittableList {
+    let mut objects = HittableList::new();
+    let pertext = Arc::new(NoiseTexture {
+        noise: Perlin::new(),
+    });
+    objects.add(Arc::new(Sphere {
+        center: Point3 {
+            e: (0.0, -1000.0, 0.0),
+        },
+        radius: 1000.0,
+        mat_ptr: Arc::new(Lambertian {
+            albedo: pertext.clone(),
+        }),
+    }));
+    objects.add(Arc::new(Sphere {
+        center: Point3 { e: (0.0, 2.0, 0.0) },
+        radius: 2.0,
+        mat_ptr: Arc::new(Lambertian { albedo: pertext }),
     }));
     objects
 }

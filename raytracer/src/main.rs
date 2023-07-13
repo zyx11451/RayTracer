@@ -3,6 +3,7 @@ pub mod bvh;
 pub mod camera;
 pub mod hittable;
 pub mod material;
+pub mod perlin;
 pub mod randoms;
 pub mod ray;
 pub mod texture;
@@ -33,8 +34,9 @@ use crate::hittable::Hittable;
 //use crate::material::Lambertian;
 //use crate::material::Metal;
 use crate::randoms::random_double;
+use crate::randoms::two_perlin_sphere;
 //use crate::randoms::random_scene;
-use crate::randoms::two_spheres;
+//use crate::randoms::two_spheres;
 use crate::ray::write_color;
 use crate::ray::Ray;
 use crate::vec3::Color;
@@ -95,7 +97,7 @@ fn ray_color(r: &Ray, world: &BvhNode, depth: i32) -> Color {
 }
 fn main() {
     //
-    let path = std::path::Path::new("output/book2/image3.jpg");
+    let path = std::path::Path::new("output/book2/image4.jpg");
     let prefix = path.parent().unwrap();
     std::fs::create_dir_all(prefix).expect("Cannot create all the parents");
     //Image
@@ -107,7 +109,7 @@ fn main() {
     let max_depth = 50;
     let img: RgbImage = ImageBuffer::new(width, height);
     //World
-    let world: HittableList = two_spheres();
+    let world: HittableList = two_perlin_sphere();
     let end = world.objects.len() as u32;
     let bvh = BvhNode::new_nodes(world.objects, 0, end, 0.0, 1.0);
     //Camera
@@ -122,7 +124,7 @@ fn main() {
         NewCamMessage {
             vfov: 20.0,
             _aspect_ratio: aspect_ratio,
-            aperture: 0.1,
+            aperture: 0.0,
             focus_dist: 10.0,
             _time0: 0.0,
             _time1: 1.0,
