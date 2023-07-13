@@ -1,7 +1,9 @@
 //随机相关和场景
 use crate::{
     hittable::HittableList,
-    hittable::{MovingSphere, MyBox, RotateY, Sphere, Translate, XyRect, XzRect, YzRect},
+    hittable::{
+        ConstantMedium, MovingSphere, MyBox, RotateY, Sphere, Translate, XyRect, XzRect, YzRect,
+    },
     material::{Dielectric, DiffuseLight, Lambertian, Metal},
     perlin::Perlin,
     texture::{CheckerTexture, ImageTexture, NoiseTexture, SolidColor},
@@ -381,5 +383,118 @@ pub fn cornell_box() -> HittableList {
         ptr: box2,
     });
     objects.add(box2);
+    objects
+}
+pub fn cornell_box_smoke() -> HittableList {
+    let mut objects = HittableList::new();
+    let red = Arc::new(Lambertian {
+        albedo: Arc::new(SolidColor {
+            color_value: Color {
+                e: (0.65, 0.05, 0.05),
+            },
+        }),
+    });
+    let white = Arc::new(Lambertian {
+        albedo: Arc::new(SolidColor {
+            color_value: Color {
+                e: (0.73, 0.73, 0.73),
+            },
+        }),
+    });
+    let green = Arc::new(Lambertian {
+        albedo: Arc::new(SolidColor {
+            color_value: Color {
+                e: (0.12, 0.45, 0.15),
+            },
+        }),
+    });
+    let light = Arc::new(DiffuseLight::new(Color { e: (7.0, 7.0, 7.0) }));
+    objects.add(Arc::new(YzRect {
+        y0: 0.0,
+        y1: 555.0,
+        z0: 0.0,
+        z1: 555.0,
+        k: 555.0,
+        mp: green,
+    }));
+    objects.add(Arc::new(YzRect {
+        y0: 0.0,
+        y1: 555.0,
+        z0: 0.0,
+        z1: 555.0,
+        k: 0.0,
+        mp: red,
+    }));
+    objects.add(Arc::new(XzRect {
+        x0: 113.0,
+        x1: 443.0,
+        z0: 127.0,
+        z1: 432.0,
+        k: 554.0,
+        mp: light,
+    }));
+    objects.add(Arc::new(XzRect {
+        x0: 0.0,
+        x1: 555.0,
+        z0: 0.0,
+        z1: 555.0,
+        k: 0.0,
+        mp: white.clone(),
+    }));
+    objects.add(Arc::new(XzRect {
+        x0: 0.0,
+        x1: 555.0,
+        z0: 0.0,
+        z1: 555.0,
+        k: 555.0,
+        mp: white.clone(),
+    }));
+    objects.add(Arc::new(XyRect {
+        x0: 0.0,
+        x1: 555.0,
+        y0: 0.0,
+        y1: 555.0,
+        k: 555.0,
+        mp: white.clone(),
+    }));
+    let box1 = Arc::new(MyBox::new(
+        &Point3 { e: (0.0, 0.0, 0.0) },
+        &Point3 {
+            e: (165.0, 330.0, 165.0),
+        },
+        white.clone(),
+    ));
+    let box1 = Arc::new(RotateY::new(box1, 15.0));
+    let box1 = Arc::new(Translate {
+        offset: Vec3 {
+            e: (265.0, 0.0, 295.0),
+        },
+        ptr: box1,
+    });
+
+    objects.add(Arc::new(ConstantMedium::new(
+        box1,
+        0.01,
+        Arc::new(SolidColor::new(Color { e: (0.0, 0.0, 0.0) })),
+    )));
+    let box2 = Arc::new(MyBox::new(
+        &Point3 { e: (0.0, 0.0, 0.0) },
+        &Point3 {
+            e: (165.0, 165.0, 165.0),
+        },
+        white,
+    ));
+    let box2 = Arc::new(RotateY::new(box2, -18.0));
+    let box2 = Arc::new(Translate {
+        offset: Vec3 {
+            e: (130.0, 0.0, 65.0),
+        },
+        ptr: box2,
+    });
+    objects.add(Arc::new(ConstantMedium::new(
+        box2,
+        0.01,
+        Arc::new(SolidColor::new(Color { e: (1.0, 1.0, 1.0) })),
+    )));
     objects
 }

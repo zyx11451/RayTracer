@@ -29,7 +29,8 @@ use crate::bvh::BvhNode;
 use crate::camera::Camera;
 use crate::camera::NewCamMessage;
 use crate::hittable::Hittable;
-use crate::randoms::cornell_box;
+//use crate::randoms::cornell_box;
+use crate::randoms::cornell_box_smoke;
 //use crate::randoms::earth;
 //use crate::hittable::Sphere;
 //use crate::material::Dielectric;
@@ -99,7 +100,7 @@ fn ray_color(r: &Ray, background: Color, world: &BvhNode, depth: i32) -> Color {
 }
 fn main() {
     //
-    let path = std::path::Path::new("output/book2/image16.jpg");
+    let path = std::path::Path::new("output/book2/image17.jpg");
     let prefix = path.parent().unwrap();
     std::fs::create_dir_all(prefix).expect("Cannot create all the parents");
     //Image
@@ -112,7 +113,7 @@ fn main() {
     let img: RgbImage = ImageBuffer::new(width, height);
     //World
     let background = Color { e: (0.0, 0.0, 0.0) };
-    let world: HittableList = cornell_box();
+    let world: HittableList = cornell_box_smoke();
     let end = world.objects.len() as u32;
     let bvh = BvhNode::new_nodes(world.objects, 0, end, 0.0, 1.0);
     //Camera
