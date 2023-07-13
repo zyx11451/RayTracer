@@ -1,8 +1,8 @@
 //随机相关和场景
 use crate::{
     hittable::HittableList,
-    hittable::{MovingSphere, Sphere},
-    material::{Dielectric, Lambertian, Metal},
+    hittable::{MovingSphere, Sphere, XyRect},
+    material::{Dielectric, DiffuseLight, Lambertian, Metal},
     perlin::Perlin,
     texture::{CheckerTexture, ImageTexture, NoiseTexture, SolidColor},
     vec3::{mul_vec_dot, Color, Point3, Vec3},
@@ -237,6 +237,37 @@ pub fn earth() -> HittableList {
         center: Point3 { e: (0.0, 0.0, 0.0) },
         radius: 2.0,
         mat_ptr: earth_surface,
+    }));
+    objects
+}
+pub fn simple_light() -> HittableList {
+    let mut objects = HittableList::new();
+    let pertext = Arc::new(NoiseTexture {
+        noise: Perlin::new(),
+        scale: 4.0,
+    });
+    objects.add(Arc::new(Sphere {
+        center: Point3 {
+            e: (0.0, -1000.0, 0.0),
+        },
+        radius: 1000.0,
+        mat_ptr: Arc::new(Lambertian {
+            albedo: pertext.clone(),
+        }),
+    }));
+    objects.add(Arc::new(Sphere {
+        center: Point3 { e: (0.0, 2.0, 0.0) },
+        radius: 2.0,
+        mat_ptr: Arc::new(Lambertian { albedo: pertext }),
+    }));
+    let difflight = Arc::new(DiffuseLight::new(Color { e: (4.0, 4.0, 4.0) }));
+    objects.add(Arc::new(XyRect {
+        x0: 3.0,
+        x1: 5.0,
+        y0: 1.0,
+        y1: 3.0,
+        k: -2.0,
+        mp: difflight,
     }));
     objects
 }
