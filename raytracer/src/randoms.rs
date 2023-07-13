@@ -1,3 +1,4 @@
+//随机相关和场景
 use crate::{
     hittable::HittableList,
     hittable::{MovingSphere, Sphere},
@@ -176,4 +177,28 @@ pub fn random_scene() -> HittableList {
 }
 pub fn random_int(min: i32, max: i32) -> i32 {
     (random_double(min as f64, (max + 1) as f64)) as i32
+}
+pub fn two_spheres() -> HittableList {
+    let mut objects = HittableList::new();
+    let checker = Arc::new(CheckerTexture {
+        even: Arc::new(SolidColor::new(Color { e: (0.2, 0.3, 0.1) })),
+        odd: Arc::new(SolidColor::new(Color { e: (0.9, 0.9, 0.9) })),
+    });
+    objects.add(Arc::new(Sphere {
+        center: Point3 {
+            e: (0.0, -10.0, 0.0),
+        },
+        radius: 10.0,
+        mat_ptr: Arc::new(Lambertian {
+            albedo: checker.clone(),
+        }),
+    }));
+    objects.add(Arc::new(Sphere {
+        center: Point3 {
+            e: (0.0, 10.0, 0.0),
+        },
+        radius: 10.0,
+        mat_ptr: Arc::new(Lambertian { albedo: checker }),
+    }));
+    objects
 }
