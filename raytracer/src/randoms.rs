@@ -4,7 +4,7 @@ use crate::{
     hittable::{MovingSphere, Sphere},
     material::{Dielectric, Lambertian, Metal},
     perlin::Perlin,
-    texture::{CheckerTexture, NoiseTexture, SolidColor},
+    texture::{CheckerTexture, ImageTexture, NoiseTexture, SolidColor},
     vec3::{mul_vec_dot, Color, Point3, Vec3},
 };
 use rand::Rng;
@@ -222,6 +222,21 @@ pub fn two_perlin_sphere() -> HittableList {
         center: Point3 { e: (0.0, 2.0, 0.0) },
         radius: 2.0,
         mat_ptr: Arc::new(Lambertian { albedo: pertext }),
+    }));
+    objects
+}
+pub fn earth() -> HittableList {
+    let mut objects = HittableList::new();
+    let path = std::path::Path::new("raytracer/src/earthmap.jpg");
+    let earth_texture = Arc::new(ImageTexture::new(path));
+
+    let earth_surface = Arc::new(Lambertian {
+        albedo: earth_texture,
+    });
+    objects.add(Arc::new(Sphere {
+        center: Point3 { e: (0.0, 0.0, 0.0) },
+        radius: 2.0,
+        mat_ptr: earth_surface,
     }));
     objects
 }

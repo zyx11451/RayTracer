@@ -29,12 +29,13 @@ use crate::bvh::BvhNode;
 use crate::camera::Camera;
 use crate::camera::NewCamMessage;
 use crate::hittable::Hittable;
+use crate::randoms::earth;
 //use crate::hittable::Sphere;
 //use crate::material::Dielectric;
 //use crate::material::Lambertian;
 //use crate::material::Metal;
 use crate::randoms::random_double;
-use crate::randoms::two_perlin_sphere;
+//use crate::randoms::two_perlin_sphere;
 //use crate::randoms::random_scene;
 //use crate::randoms::two_spheres;
 use crate::ray::write_color;
@@ -97,7 +98,7 @@ fn ray_color(r: &Ray, world: &BvhNode, depth: i32) -> Color {
 }
 fn main() {
     //
-    let path = std::path::Path::new("output/book2/image10.jpg");
+    let path = std::path::Path::new("output/book2/image11.jpg");
     let prefix = path.parent().unwrap();
     std::fs::create_dir_all(prefix).expect("Cannot create all the parents");
     //Image
@@ -109,7 +110,7 @@ fn main() {
     let max_depth = 50;
     let img: RgbImage = ImageBuffer::new(width, height);
     //World
-    let world: HittableList = two_perlin_sphere();
+    let world: HittableList = earth();
     let end = world.objects.len() as u32;
     let bvh = BvhNode::new_nodes(world.objects, 0, end, 0.0, 1.0);
     //Camera
