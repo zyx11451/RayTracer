@@ -1,7 +1,7 @@
 //随机相关和场景
 use crate::{
     hittable::HittableList,
-    hittable::{MovingSphere, Sphere, XyRect},
+    hittable::{MovingSphere, Sphere, XyRect, XzRect, YzRect},
     material::{Dielectric, DiffuseLight, Lambertian, Metal},
     perlin::Perlin,
     texture::{CheckerTexture, ImageTexture, NoiseTexture, SolidColor},
@@ -273,6 +273,82 @@ pub fn simple_light() -> HittableList {
         center: Point3 { e: (0.0, 7.0, 0.0) },
         radius: 2.0,
         mat_ptr: difflight,
+    }));
+    objects
+}
+pub fn cornell_box() -> HittableList {
+    let mut objects = HittableList::new();
+    let red = Arc::new(Lambertian {
+        albedo: Arc::new(SolidColor {
+            color_value: Color {
+                e: (0.65, 0.05, 0.05),
+            },
+        }),
+    });
+    let white = Arc::new(Lambertian {
+        albedo: Arc::new(SolidColor {
+            color_value: Color {
+                e: (0.73, 0.73, 0.73),
+            },
+        }),
+    });
+    let green = Arc::new(Lambertian {
+        albedo: Arc::new(SolidColor {
+            color_value: Color {
+                e: (0.12, 0.45, 0.15),
+            },
+        }),
+    });
+    let light = Arc::new(DiffuseLight::new(Color {
+        e: (15.0, 15.0, 15.0),
+    }));
+    objects.add(Arc::new(YzRect {
+        y0: 0.0,
+        y1: 555.0,
+        z0: 0.0,
+        z1: 555.0,
+        k: 555.0,
+        mp: green.clone(),
+    }));
+    objects.add(Arc::new(YzRect {
+        y0: 0.0,
+        y1: 555.0,
+        z0: 0.0,
+        z1: 555.0,
+        k: 0.0,
+        mp: red.clone(),
+    }));
+    objects.add(Arc::new(XzRect {
+        x0: 213.0,
+        x1: 343.0,
+        z0: 227.0,
+        z1: 332.0,
+        k: 554.0,
+        mp: light.clone(),
+    }));
+    objects.add(Arc::new(XzRect {
+        x0: 0.0,
+        x1: 555.0,
+        z0: 0.0,
+        z1: 555.0,
+        k: 0.0,
+        mp: white.clone(),
+    }));
+    objects.add(Arc::new(XzRect {
+        x0: 0.0,
+        x1: 555.0,
+        z0: 0.0,
+        z1: 555.0,
+        k: 555.0,
+        mp: white.clone(),
+    }));
+    objects.add(Arc::new(XyRect {
+        x0: 0.0,
+        x1: 555.0,
+        y0: 0.0,
+        y1: 555.0,
+        k: 555.0,
+        mp: white.clone(),
     }));
     objects
 }
