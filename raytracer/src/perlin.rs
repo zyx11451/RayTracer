@@ -12,9 +12,6 @@ pub struct Perlin {
 pub fn permute(p: &mut [i32; 256], n: i32) {
     for i in (1..n).rev() {
         let target = random_int(0, i);
-        /*let tmp = p[i as usize];
-        p[i as usize] = p[target as usize];
-        p[target as usize] = tmp;*/
         p.swap(i as usize, target as usize)
     }
 }
@@ -54,9 +51,12 @@ impl Perlin {
         ans
     }
     pub fn noise(&self, p: &Point3) -> f64 {
-        let u = p.e.0 - (p.e.0.floor() as f64);
-        let v = p.e.1 - (p.e.1.floor() as f64);
-        let w = p.e.2 - (p.e.2.floor() as f64);
+        let mut u = p.e.0 - (p.e.0.floor() as f64);
+        let mut v = p.e.1 - (p.e.1.floor() as f64);
+        let mut w = p.e.2 - (p.e.2.floor() as f64);
+        u = u * u * (3.0 - 2.0 * u);
+        v = v * v * (3.0 - 2.0 * v);
+        w = w * w * (3.0 - 2.0 * w);
         let i = (p.e.0.floor()) as i32;
         let j = (p.e.1.floor()) as i32;
         let k = (p.e.2.floor()) as i32;
