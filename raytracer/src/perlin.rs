@@ -24,6 +24,19 @@ pub fn perlin_generate_perm(p: &mut [i32; 256]) {
     }
     permute(p, 256);
 }
+pub fn trilinear_interp(c: &[f64; 8], u: f64, v: f64, w: f64) -> f64 {
+    let mut accum = 0.0;
+    for t in 0..8 {
+        let i = (t / 4) as f64;
+        let j = ((t % 4) / 2) as f64;
+        let k = (t % 2) as f64;
+        accum += (i * u + (1.0 - i) * (1.0 - u))
+            * (j * v + (1.0 - j) * (1.0 - v))
+            * (k * w + (1.0 - k) * (1.0 - w))
+            * c[t as usize];
+    }
+    accum
+}
 impl Perlin {
     pub fn new() -> Self {
         let mut ans = Perlin {
@@ -41,11 +54,23 @@ impl Perlin {
         ans
     }
     pub fn noise(&self, p: &Point3) -> f64 {
-        let i = ((4.0 * p.e.0) as i32) & 255;
-        let j = ((4.0 * p.e.1) as i32) & 255;
-        let k = ((4.0 * p.e.2) as i32) & 255;
-        self.ranfloat
-            [(self.perm_x[i as usize] ^ self.perm_y[j as usize] ^ self.perm_z[k as usize]) as usize]
+        let u = p.e.0 - (p.e.0.floor() as f64);
+        let v = p.e.1 - (p.e.1.floor() as f64);
+        let w = p.e.2 - (p.e.2.floor() as f64);
+        let i = (p.e.0.floor()) as i32;
+        let j = (p.e.1.floor()) as i32;
+        let k = (p.e.2.floor()) as i32;
+        let mut c = [0.0; 8];
+        for t in 0..8 {
+            let di = t / 4;
+            let dj = (t % 4) / 2;
+            let dk = t % 2;
+            c[t as usize] = self.ranfloat[(self.perm_x[((i + di) & 255) as usize]
+                ^ self.perm_y[((j + dj) & 255) as usize]
+                ^ self.perm_z[((k + dk) & 255) as usize])
+                as usize]
+        }
+        trilinear_interp(&c, u, v, w)
     }
 }
 impl Default for Perlin {
