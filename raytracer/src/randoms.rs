@@ -308,7 +308,7 @@ pub fn cornell_box() -> HittableList {
         z0: 0.0,
         z1: 555.0,
         k: 555.0,
-        mp: green.clone(),
+        mp: green,
     }));
     objects.add(Arc::new(YzRect {
         y0: 0.0,
@@ -316,7 +316,7 @@ pub fn cornell_box() -> HittableList {
         z0: 0.0,
         z1: 555.0,
         k: 0.0,
-        mp: red.clone(),
+        mp: red,
     }));
     objects.add(Arc::new(XzRect {
         x0: 213.0,
@@ -324,7 +324,7 @@ pub fn cornell_box() -> HittableList {
         z0: 227.0,
         z1: 332.0,
         k: 554.0,
-        mp: light.clone(),
+        mp: light,
     }));
     objects.add(Arc::new(XzRect {
         x0: 0.0,
@@ -348,7 +348,7 @@ pub fn cornell_box() -> HittableList {
         y0: 0.0,
         y1: 555.0,
         k: 555.0,
-        mp: white.clone(),
+        mp: white,
     }));
     objects
 }
