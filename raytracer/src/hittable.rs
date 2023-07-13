@@ -3,6 +3,7 @@ use crate::aabb::AABB;
 use crate::material::Dielectric;
 //use crate::material::Lambertian;
 use crate::material::Material;
+//use crate::randoms::min;
 use crate::vec3::mul_num;
 
 use super::ray::Ray;
@@ -10,6 +11,7 @@ use super::vec3::mul_vec_dot;
 use super::vec3::Point3;
 use super::vec3::Vec3;
 use std::f64::consts::PI;
+use std::f64::INFINITY;
 //use std::rc::Rc;
 use std::sync::Arc;
 use std::vec::Vec;
@@ -435,5 +437,119 @@ impl Hittable for MyBox {
             maximum: self.box_max,
         };
         true
+    }
+}
+pub struct Translate {
+    pub offset: Vec3,
+    pub ptr: Arc<dyn Hittable>,
+}
+impl Hittable for Translate {
+    fn hit(&self, r: &Ray, t_min: f64, t_max: f64, rec: &mut HitRecord) -> bool {
+        let moved_r = Ray {
+            orig: r.orig - self.offset,
+            dir: r.dir,
+            time: r.time,
+        };
+        if !(self.ptr.hit(&moved_r, t_min, t_max, rec)) {
+            return false;
+        }
+        rec.p += self.offset;
+        rec.set_face_normal(&moved_r, rec.normal);
+        true
+    }
+    fn bounding_box(&self, time0: f64, time1: f64, output_box: &mut AABB) -> bool {
+        if !(self.ptr.bounding_box(time0, time1, output_box)) {
+            return false;
+        }
+        *output_box = AABB {
+            minimum: output_box.minimum + self.offset,
+            maximum: output_box.maximum + self.offset,
+        };
+        true
+    }
+}
+pub struct RotateY {
+    pub ptr: Arc<dyn Hittable>,
+    pub sin_theta: f64,
+    pub cos_theta: f64,
+    pub hasbox: bool,
+    pub bbox: AABB,
+}
+impl RotateY {
+    pub fn new(p: Arc<dyn Hittable>, angle: f64) -> Self {
+        let radians = angle.to_radians();
+        let sin_theta_ = radians.sin();
+        let cos_theta_ = radians.cos();
+        let mut bbox_ = AABB {
+            minimum: Vec3::new(),
+            maximum: Vec3::new(),
+        };
+        let hasbox_ = p.bounding_box(0.0, 1.0, &mut bbox_);
+        let mut min = Point3 {
+            e: (INFINITY, INFINITY, INFINITY),
+        };
+        let mut max = Point3 {
+            e: (-INFINITY, -INFINITY, -INFINITY),
+        };
+        for t in 0..8 {
+            let i = t / 4;
+            let j = (t % 4) / 2;
+            let k = t % 2;
+            let x = (i as f64) * bbox_.maximum.e.0 + ((1 - i) as f64) * bbox_.minimum.e.0;
+            let y = (j as f64) * bbox_.maximum.e.1 + ((1 - j) as f64) * bbox_.minimum.e.1;
+            let z = (k as f64) * bbox_.maximum.e.2 + ((1 - k) as f64) * bbox_.minimum.e.2;
+            let new_x = cos_theta_ * x + sin_theta_ * z;
+            let new_z = -sin_theta_ * x + cos_theta_ * z;
+            let tester = Vec3 {
+                e: (new_x, y, new_z),
+            };
+            min.e.0 = crate::randoms::min(min.e.0, tester.e.0);
+            max.e.0 = crate::randoms::max(max.e.0, tester.e.0);
+            min.e.1 = crate::randoms::min(min.e.1, tester.e.1);
+            max.e.1 = crate::randoms::max(max.e.1, tester.e.1);
+            min.e.2 = crate::randoms::min(min.e.2, tester.e.2);
+            max.e.2 = crate::randoms::max(max.e.0, tester.e.2);
+        }
+        Self {
+            ptr: p,
+            sin_theta: sin_theta_,
+            cos_theta: cos_theta_,
+            hasbox: hasbox_,
+            bbox: AABB {
+                minimum: min,
+                maximum: max,
+            },
+        }
+    }
+}
+impl Hittable for RotateY {
+    fn hit(&self, r: &Ray, t_min: f64, t_max: f64, rec: &mut HitRecord) -> bool {
+        let mut origin = r.orig;
+        let mut direction = r.dir;
+        origin.e.0 = self.cos_theta * r.orig.e.0 - self.sin_theta * r.orig.e.2;
+        origin.e.2 = self.sin_theta * r.orig.e.0 + self.cos_theta * r.orig.e.2;
+        direction.e.0 = self.cos_theta * r.dir.e.0 - self.sin_theta * r.dir.e.2;
+        direction.e.2 = self.sin_theta * r.dir.e.0 + self.cos_theta * r.dir.e.2;
+        let rotated_r = Ray {
+            orig: origin,
+            dir: direction,
+            time: r.time,
+        };
+        if !(self.ptr.hit(&rotated_r, t_min, t_max, rec)) {
+            return false;
+        }
+        let mut p = rec.p;
+        let mut normal = rec.normal;
+        p.e.0 = self.cos_theta * rec.p.e.0 + self.sin_theta * rec.p.e.2;
+        p.e.2 = -self.sin_theta * rec.p.e.0 + self.cos_theta * rec.p.e.2;
+        normal.e.0 = self.cos_theta * rec.normal.e.0 + self.sin_theta * rec.normal.e.2;
+        normal.e.2 = -self.sin_theta * rec.normal.e.0 + self.cos_theta * rec.normal.e.2;
+        rec.p = p;
+        rec.set_face_normal(&rotated_r, normal);
+        true
+    }
+    fn bounding_box(&self, _time0: f64, _time1: f64, output_box: &mut AABB) -> bool {
+        *output_box = self.bbox;
+        self.hasbox
     }
 }

@@ -1,7 +1,7 @@
 //随机相关和场景
 use crate::{
     hittable::HittableList,
-    hittable::{MovingSphere, MyBox, Sphere, XyRect, XzRect, YzRect},
+    hittable::{MovingSphere, MyBox, RotateY, Sphere, Translate, XyRect, XzRect, YzRect},
     material::{Dielectric, DiffuseLight, Lambertian, Metal},
     perlin::Perlin,
     texture::{CheckerTexture, ImageTexture, NoiseTexture, SolidColor},
@@ -350,23 +350,36 @@ pub fn cornell_box() -> HittableList {
         k: 555.0,
         mp: white.clone(),
     }));
-    objects.add(Arc::new(MyBox::new(
+    let box1 = Arc::new(MyBox::new(
+        &Point3 { e: (0.0, 0.0, 0.0) },
         &Point3 {
-            e: (130.0, 0.0, 65.0),
-        },
-        &Point3 {
-            e: (295.0, 165.0, 230.0),
+            e: (165.0, 330.0, 165.0),
         },
         white.clone(),
-    )));
-    objects.add(Arc::new(MyBox::new(
-        &Point3 {
+    ));
+    let box1 = Arc::new(RotateY::new(box1, 15.0));
+    let box1 = Arc::new(Translate {
+        offset: Vec3 {
             e: (265.0, 0.0, 295.0),
         },
+        ptr: box1,
+    });
+
+    objects.add(box1);
+    let box2 = Arc::new(MyBox::new(
+        &Point3 { e: (0.0, 0.0, 0.0) },
         &Point3 {
-            e: (430.0, 330.0, 460.0),
+            e: (165.0, 165.0, 165.0),
         },
         white,
-    )));
+    ));
+    let box2 = Arc::new(RotateY::new(box2, -18.0));
+    let box2 = Arc::new(Translate {
+        offset: Vec3 {
+            e: (130.0, 0.0, 65.0),
+        },
+        ptr: box2,
+    });
+    objects.add(box2);
     objects
 }
