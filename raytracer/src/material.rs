@@ -10,7 +10,7 @@ pub trait Material {
     fn scatter(
         &self,
         r_in: &Ray,
-        rec: HitRecord,
+        rec: &HitRecord,
         attenuation: &mut Color,
         scattered: &mut Ray,
     ) -> bool;
@@ -25,7 +25,7 @@ impl Material for Lambertian {
     fn scatter(
         &self,
         r_in: &Ray,
-        rec: HitRecord,
+        rec: &HitRecord,
         attenuation: &mut Color,
         scattered: &mut Ray,
     ) -> bool {
@@ -50,7 +50,7 @@ impl Material for Metal {
     fn scatter(
         &self,
         r_in: &Ray,
-        rec: HitRecord,
+        rec: &HitRecord,
         attenuation: &mut Color,
         scattered: &mut Ray,
     ) -> bool {
@@ -76,7 +76,7 @@ impl Material for Dielectric {
     fn scatter(
         &self,
         r_in: &Ray,
-        rec: HitRecord,
+        rec: &HitRecord,
         attenuation: &mut Color,
         scattered: &mut Ray,
     ) -> bool {
@@ -119,7 +119,7 @@ impl Material for DiffuseLight {
     fn scatter(
         &self,
         _r_in: &Ray,
-        _rec: HitRecord,
+        _rec: &HitRecord,
         _attenuation: &mut Color,
         _scattered: &mut Ray,
     ) -> bool {
@@ -143,7 +143,7 @@ impl Material for Isotropic {
     fn scatter(
         &self,
         r_in: &Ray,
-        rec: HitRecord,
+        rec: &HitRecord,
         attenuation: &mut Color,
         scattered: &mut Ray,
     ) -> bool {

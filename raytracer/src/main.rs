@@ -30,7 +30,8 @@ use crate::camera::Camera;
 use crate::camera::NewCamMessage;
 use crate::hittable::Hittable;
 //use crate::randoms::cornell_box;
-use crate::randoms::cornell_box_smoke;
+//use crate::randoms::cornell_box_smoke;
+use crate::randoms::final_scene;
 //use crate::randoms::earth;
 //use crate::hittable::Sphere;
 //use crate::material::Dielectric;
@@ -47,32 +48,32 @@ use crate::vec3::Color;
 use crate::vec3::Point3;
 use crate::vec3::Vec3;
 
-/*fn ray_color(r: &Ray, world: &HittableList, depth: i32) -> Color {
+/*fn ray_color(r: &Ray,background: Color, world: &HittableList, depth: i32) -> Color {
     let mut rec: HitRecord = HitRecord::new();
     if depth <= 0 {
         return Color { e: (0.0, 0.0, 0.0) };
     }
-    if world.hit(r, 0.001,  INFINITY, &mut rec) {
+    if world.hit(r, 0.001, INFINITY, &mut rec) {
         let mut scattered: Ray = Ray {
             orig: (Vec3::new()),
             dir: (Vec3::new()),
             time: 0.0,
         };
         let mut attenuation: Color = Color::new();
+        let emitted = rec.mat_ptr.emitted(rec.u, rec.v, &rec.p);
         if rec
             .mat_ptr
-            .scatter(r, rec.clone(), &mut attenuation, &mut scattered)
+            .scatter(r, &rec, &mut attenuation, &mut scattered)
         {
-            attenuation * ray_color(&scattered, world, depth - 1)
+            emitted + attenuation * ray_color(&scattered, background, world, depth - 1)
         } else {
-            Color { e: (0.0, 0.0, 0.0) }
+            emitted
         }
     } else {
-        let unit_direction: Vec3 = r.dir.unit_vector();
-        let t: f64 = 0.5 * (unit_direction.e.1 + 1.0);
-        mul_num(Color { e: (1.0, 1.0, 1.0) }, 1.0 - t) + mul_num(Color { e: (0.5, 0.7, 1.0) }, t)
+        background
     }
 }*/
+
 fn ray_color(r: &Ray, background: Color, world: &BvhNode, depth: i32) -> Color {
     let mut rec: HitRecord = HitRecord::new();
     if depth <= 0 {
@@ -88,7 +89,7 @@ fn ray_color(r: &Ray, background: Color, world: &BvhNode, depth: i32) -> Color {
         let emitted = rec.mat_ptr.emitted(rec.u, rec.v, &rec.p);
         if rec
             .mat_ptr
-            .scatter(r, rec.clone(), &mut attenuation, &mut scattered)
+            .scatter(r, &rec, &mut attenuation, &mut scattered)
         {
             emitted + attenuation * ray_color(&scattered, background, world, depth - 1)
         } else {
@@ -100,12 +101,12 @@ fn ray_color(r: &Ray, background: Color, world: &BvhNode, depth: i32) -> Color {
 }
 fn main() {
     //
-    let path = std::path::Path::new("output/book2/image17.jpg");
+    let path = std::path::Path::new("output/book2/image18.jpg");
     let prefix = path.parent().unwrap();
     std::fs::create_dir_all(prefix).expect("Cannot create all the parents");
     //Image
     let aspect_ratio: f64 = 1.0;
-    let width = 600;
+    let width = 800;
     let height = ((width as f64) / aspect_ratio) as u32;
     let quality = 100;
     let samples_per_pixel = 200;
@@ -113,12 +114,12 @@ fn main() {
     let img: RgbImage = ImageBuffer::new(width, height);
     //World
     let background = Color { e: (0.0, 0.0, 0.0) };
-    let world: HittableList = cornell_box_smoke();
+    let world: HittableList = final_scene();
     let end = world.objects.len() as u32;
     let bvh = BvhNode::new_nodes(world.objects, 0, end, 0.0, 1.0);
     //Camera
     let lookfrom: Point3 = Point3 {
-        e: (278.0, 278.0, -800.0),
+        e: (478.0, 278.0, -600.0),
     };
     let lookat: Point3 = Point3 {
         e: (278.0, 278.0, 0.0),
@@ -137,9 +138,9 @@ fn main() {
         },
     );
     //Render
-    let thread_num = 15; //必须是图像高度的因数
+    let thread_num = 20; //必须是图像高度的因数
     let main_progress = Arc::new(Mutex::new(MultiProgress::new()));
-    let thread_height = height / thread_num;
+    //let thread_height = height / thread_num;
     //let b = Arc::new(world);
     let bvh_a = Arc::new(bvh);
     let im = Arc::new(Mutex::new(img));
@@ -153,28 +154,30 @@ fn main() {
         let bvh_a_in_thread = bvh_a.clone();
         let im_in_thread = im.clone();
         let each_thread = thread::spawn(move || {
-            let max_h = ((p + 1) * thread_height).min(height);
-            for j in (p * thread_height..max_h).rev() {
-                for i in 0..width {
-                    let mut pixel_color: Color = Color { e: (0.0, 0.0, 0.0) };
-                    let mut s = 0;
-                    while s < samples_per_pixel {
-                        let u = (1.0 * (i as f64) + random_double(0.0, 1.0)) / (width - 1) as f64;
-                        let v = (1.0 * ((height - j - 1) as f64) + random_double(0.0, 1.0))
-                            / (height - 1) as f64;
-                        let r: Ray = cam.get_ray(u, v);
-                        pixel_color.add_assign(ray_color(
-                            &r,
-                            background,
-                            bvh_a_in_thread.as_ref(),
-                            max_depth,
-                        ));
-                        s += 1;
+            for j in (0..height).rev() {
+                if j % thread_num == p {
+                    for i in 0..width {
+                        let mut pixel_color: Color = Color { e: (0.0, 0.0, 0.0) };
+                        let mut s = 0;
+                        while s < samples_per_pixel {
+                            let u =
+                                (1.0 * (i as f64) + random_double(0.0, 1.0)) / (width - 1) as f64;
+                            let v = (1.0 * ((height - j - 1) as f64) + random_double(0.0, 1.0))
+                                / (height - 1) as f64;
+                            let r: Ray = cam.get_ray(u, v);
+                            pixel_color.add_assign(ray_color(
+                                &r,
+                                background,
+                                bvh_a_in_thread.as_ref(),
+                                max_depth,
+                            ));
+                            s += 1;
+                        }
+                        let mut img1 = im_in_thread.lock().unwrap();
+                        let pixel = (*img1).get_pixel_mut(i, j);
+                        *pixel = write_color(pixel_color, samples_per_pixel);
+                        progress.inc(1);
                     }
-                    let mut img1 = im_in_thread.lock().unwrap();
-                    let pixel = (*img1).get_pixel_mut(i, j);
-                    *pixel = write_color(pixel_color, samples_per_pixel);
-                    progress.inc(1);
                 }
             }
             progress.finish();
