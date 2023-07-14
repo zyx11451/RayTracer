@@ -2,11 +2,9 @@ use crate::aabb::surrounding_box;
 use crate::aabb::AABB;
 use crate::material::Dielectric;
 use crate::material::Isotropic;
-//use crate::material::Lambertian;
 use crate::material::Material;
 use crate::randoms::random_double;
 use crate::texture::Texture;
-//use crate::randoms::min;
 use crate::vec3::mul_num;
 
 use super::ray::Ray;
@@ -15,7 +13,6 @@ use super::vec3::Point3;
 use super::vec3::Vec3;
 use std::f64::consts::PI;
 use std::f64::INFINITY;
-//use std::rc::Rc;
 use std::sync::Arc;
 use std::vec::Vec;
 

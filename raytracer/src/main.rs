@@ -140,7 +140,6 @@ fn main() {
     //Render
     let thread_num = 20; //必须是图像高度的因数
     let main_progress = Arc::new(Mutex::new(MultiProgress::new()));
-    //let thread_height = height / thread_num;
     //let b = Arc::new(world);
     let bvh_a = Arc::new(bvh);
     let im = Arc::new(Mutex::new(img));

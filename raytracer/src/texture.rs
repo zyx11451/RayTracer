@@ -24,7 +24,7 @@ impl Texture for SolidColor {
         self.color_value
     }
 }
-pub struct CheckerTexture {
+pub struct CheckerTexture{
     pub odd: Box<dyn Texture>,
     pub even: Box<dyn Texture>,
 }

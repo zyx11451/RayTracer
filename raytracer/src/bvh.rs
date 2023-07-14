@@ -7,8 +7,6 @@ use crate::{
     ray::Ray,
     vec3::Vec3,
 };
-
-#[derive(Clone)]
 pub struct BvhNode {
     pub left: Arc<dyn Hittable>,
     pub right: Arc<dyn Hittable>,
