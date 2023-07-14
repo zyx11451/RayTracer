@@ -562,7 +562,7 @@ pub struct ConstantMedium {
     pub neg_inv_density: f64,
 }
 impl ConstantMedium {
-    pub fn new(b: Arc<dyn Hittable>, d: f64, a: Arc<dyn Texture>) -> Self {
+    pub fn new(b: Arc<dyn Hittable>, d: f64, a: Box<dyn Texture>) -> Self {
         Self {
             boundary: b,
             phase_function: Arc::new(Isotropic { albedo: a }),

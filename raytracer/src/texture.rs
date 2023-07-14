@@ -1,4 +1,4 @@
-use std::{path::Path, sync::Arc};
+use std::path::Path;
 
 use image::{DynamicImage, RgbImage};
 
@@ -25,8 +25,8 @@ impl Texture for SolidColor {
     }
 }
 pub struct CheckerTexture {
-    pub odd: Arc<dyn Texture>,
-    pub even: Arc<dyn Texture>,
+    pub odd: Box<dyn Texture>,
+    pub even: Box<dyn Texture>,
 }
 impl Texture for CheckerTexture {
     fn value(&self, u: f64, v: f64, p: &Point3) -> Color {

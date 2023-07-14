@@ -1,5 +1,3 @@
-use std::sync::Arc;
-
 use crate::randoms::{min, random_double, random_in_unit_sphere, random_unit_vec};
 use crate::texture::{SolidColor, Texture};
 use crate::vec3::{mul_vec_dot, reflect, refract, Color, Point3, Vec3};
@@ -19,7 +17,7 @@ pub trait Material {
     }
 }
 pub struct Lambertian {
-    pub albedo: Arc<dyn Texture>,
+    pub albedo: Box<dyn Texture>,
 }
 impl Material for Lambertian {
     fn scatter(
@@ -106,12 +104,12 @@ impl Material for Dielectric {
     }
 }
 pub struct DiffuseLight {
-    pub emit: Arc<dyn Texture>,
+    pub emit: Box<dyn Texture>,
 }
 impl DiffuseLight {
     pub fn new(c: Color) -> Self {
         Self {
-            emit: Arc::new(SolidColor { color_value: c }),
+            emit: Box::new(SolidColor { color_value: c }),
         }
     }
 }
@@ -130,12 +128,12 @@ impl Material for DiffuseLight {
     }
 }
 pub struct Isotropic {
-    pub albedo: Arc<dyn Texture>,
+    pub albedo: Box<dyn Texture>,
 }
 impl Isotropic {
     pub fn new(a: Color) -> Self {
         Self {
-            albedo: Arc::new(SolidColor { color_value: a }),
+            albedo: Box::new(SolidColor { color_value: a }),
         }
     }
 }
