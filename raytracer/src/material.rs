@@ -16,10 +16,11 @@ pub trait Material {
         Color { e: (0.0, 0.0, 0.0) }
     }
 }
-pub struct Lambertian {
-    pub albedo: Box<dyn Texture>,
+#[derive(Clone)]
+pub struct Lambertian <T:Texture>{
+    pub albedo: T,
 }
-impl Material for Lambertian {
+impl<T:Texture> Material for Lambertian<T> {
     fn scatter(
         &self,
         r_in: &Ray,
@@ -40,6 +41,7 @@ impl Material for Lambertian {
         true
     }
 }
+#[derive(Clone)]
 pub struct Metal {
     pub albedo: Color,
     pub fuzz: f64,
@@ -62,6 +64,7 @@ impl Material for Metal {
         mul_vec_dot(scattered.dir, rec.normal) > 0.0
     }
 }
+#[derive(Clone)]
 pub struct Dielectric {
     pub ir: f64,
 }
@@ -103,17 +106,18 @@ impl Material for Dielectric {
         true
     }
 }
-pub struct DiffuseLight {
-    pub emit: Box<dyn Texture>,
+#[derive(Clone)]
+pub struct DiffuseLight<T:Texture> {
+    pub emit: T,
 }
-impl DiffuseLight {
+impl DiffuseLight<SolidColor> {
     pub fn new(c: Color) -> Self {
         Self {
-            emit: Box::new(SolidColor { color_value: c }),
+            emit: SolidColor { color_value: c },
         }
     }
 }
-impl Material for DiffuseLight {
+impl<T:Texture> Material for DiffuseLight<T> {
     fn scatter(
         &self,
         _r_in: &Ray,
@@ -127,17 +131,18 @@ impl Material for DiffuseLight {
         self.emit.value(u, v, p)
     }
 }
-pub struct Isotropic {
-    pub albedo: Box<dyn Texture>,
+#[derive(Clone)]
+pub struct Isotropic <T:Texture> {
+    pub albedo: T,
 }
-impl Isotropic {
+impl Isotropic<SolidColor> {
     pub fn new(a: Color) -> Self {
         Self {
-            albedo: Box::new(SolidColor { color_value: a }),
+            albedo: SolidColor { color_value: a },
         }
     }
 }
-impl Material for Isotropic {
+impl<T:Texture> Material for Isotropic<T> {
     fn scatter(
         &self,
         r_in: &Ray,

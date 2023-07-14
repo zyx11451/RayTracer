@@ -2,7 +2,7 @@ use crate::{
     randoms::{random_int, random_vec},
     vec3::{mul_num, mul_vec_dot, Point3, Vec3},
 };
-
+#[derive(Clone)]
 pub struct Perlin {
     pub ranvec: [Vec3; 256],
     pub perm_x: [i32; 256],

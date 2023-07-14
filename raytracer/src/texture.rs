@@ -11,6 +11,7 @@ use crate::{
 pub trait Texture {
     fn value(&self, u: f64, v: f64, p: &Point3) -> Color;
 }
+#[derive(Clone)]
 pub struct SolidColor {
     pub color_value: Color,
 }
@@ -24,11 +25,12 @@ impl Texture for SolidColor {
         self.color_value
     }
 }
-pub struct CheckerTexture{
-    pub odd: Box<dyn Texture>,
-    pub even: Box<dyn Texture>,
+#[derive(Clone)]
+pub struct CheckerTexture<T1:Texture,T2:Texture>{
+    pub odd: T1,
+    pub even: T2,
 }
-impl Texture for CheckerTexture {
+impl<T1:Texture,T2:Texture> Texture for CheckerTexture<T1,T2> {
     fn value(&self, u: f64, v: f64, p: &Point3) -> Color {
         let sines = (10.0 * p.e.0).sin() * (10.0 * p.e.1).sin() * (10.0 * p.e.2).sin();
         if sines < 0.0 {
@@ -38,6 +40,7 @@ impl Texture for CheckerTexture {
         }
     }
 }
+#[derive(Clone)]
 pub struct NoiseTexture {
     pub noise: Perlin,
     pub scale: f64,
@@ -50,6 +53,7 @@ impl Texture for NoiseTexture {
         )
     }
 }
+#[derive(Clone)]
 pub struct ImageTexture {
     pub img: RgbImage,
     pub width: u32,

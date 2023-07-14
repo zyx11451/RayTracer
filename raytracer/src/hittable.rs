@@ -439,11 +439,11 @@ impl Hittable for MyBox {
         true
     }
 }
-pub struct Translate {
+pub struct Translate<H:Hittable> {
     pub offset: Vec3,
-    pub ptr: Arc<dyn Hittable>,
+    pub ptr: H,
 }
-impl Hittable for Translate {
+impl<H:Hittable> Hittable for Translate<H> {
     fn hit(&self, r: &Ray, t_min: f64, t_max: f64, rec: &mut HitRecord) -> bool {
         let moved_r = Ray {
             orig: r.orig - self.offset,
@@ -468,15 +468,15 @@ impl Hittable for Translate {
         true
     }
 }
-pub struct RotateY {
-    pub ptr: Arc<dyn Hittable>,
+pub struct RotateY<H:Hittable> {
+    pub ptr: H,
     pub sin_theta: f64,
     pub cos_theta: f64,
     pub hasbox: bool,
     pub bbox: AABB,
 }
-impl RotateY {
-    pub fn new(p: Arc<dyn Hittable>, angle: f64) -> Self {
+impl<H:Hittable> RotateY<H> {
+    pub fn new(p:  H, angle: f64) -> Self {
         let radians = angle.to_radians();
         let sin_theta_ = radians.sin();
         let cos_theta_ = radians.cos();
@@ -522,7 +522,7 @@ impl RotateY {
         }
     }
 }
-impl Hittable for RotateY {
+impl<H:Hittable> Hittable for RotateY<H> {
     fn hit(&self, r: &Ray, t_min: f64, t_max: f64, rec: &mut HitRecord) -> bool {
         let mut origin = r.orig;
         let mut direction = r.dir;
@@ -553,21 +553,21 @@ impl Hittable for RotateY {
         self.hasbox
     }
 }
-pub struct ConstantMedium {
+pub struct ConstantMedium<M:Material> {
     pub boundary: Arc<dyn Hittable>,
-    pub phase_function: Arc<dyn Material>,
+    pub phase_function: M,
     pub neg_inv_density: f64,
 }
-impl ConstantMedium {
-    pub fn new(b: Arc<dyn Hittable>, d: f64, a: Box<dyn Texture>) -> Self {
+impl<T:Clone+Texture> ConstantMedium<Isotropic<T>> {
+    pub fn new(b: Arc<dyn Hittable>, d: f64, a: T) -> Self {
         Self {
             boundary: b,
-            phase_function: Arc::new(Isotropic { albedo: a }),
+            phase_function: Isotropic { albedo: a},
             neg_inv_density: (-1.0 / d),
         }
     }
 }
-impl Hittable for ConstantMedium {
+impl<T:'static+Clone+Texture> Hittable for ConstantMedium<Isotropic<T>> {
     fn hit(&self, r: &Ray, t_min: f64, t_max: f64, rec: &mut HitRecord) -> bool {
         let mut rec1 = HitRecord::new();
         let mut rec2 = HitRecord::new();
@@ -599,7 +599,7 @@ impl Hittable for ConstantMedium {
         rec.p = r.at(rec.t);
         rec.normal = Vec3 { e: (1.0, 0.0, 0.0) };
         rec.front_face = true;
-        rec.mat_ptr = self.phase_function.clone();
+        rec.mat_ptr = Arc::new(self.phase_function.clone());
         true
     }
     fn bounding_box(&self, time0: f64, time1: f64, output_box: &mut AABB) -> bool {

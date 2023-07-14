@@ -85,10 +85,10 @@ pub fn random_in_unit_disk() -> Vec3 {
 }
 pub fn random_scene() -> HittableList {
     let mut world = HittableList::new();
-    let checker = Box::new(CheckerTexture {
-        even: Box::new(SolidColor::new(Color { e: (0.2, 0.3, 0.1) })),
-        odd: Box::new(SolidColor::new(Color { e: (0.9, 0.9, 0.9) })),
-    });
+    let checker = CheckerTexture {
+        even: SolidColor::new(Color { e: (0.2, 0.3, 0.1) }),
+        odd: SolidColor::new(Color { e: (0.9, 0.9, 0.9) }),
+    };
     let ground_material = Arc::new(Lambertian { albedo: checker });
     world.add(Arc::new(Sphere {
         center: Point3 {
@@ -115,9 +115,9 @@ pub fn random_scene() -> HittableList {
                             e: (0.0, random_double(0.0, 0.5), 0.0),
                         };
                     let sphere_material = Arc::new(Lambertian {
-                        albedo: Box::new(SolidColor {
+                        albedo: SolidColor {
                             color_value: albedo_,
-                        }),
+                        },
                     });
                     world.add(Arc::new(MovingSphere {
                         center0: center_,
@@ -157,9 +157,9 @@ pub fn random_scene() -> HittableList {
         mat_ptr: material1,
     }));
     let material2 = Arc::new(Lambertian {
-        albedo: Box::new(SolidColor {
+        albedo: SolidColor {
             color_value: Color { e: (0.4, 0.2, 0.1) },
-        }),
+        },
     });
     world.add(Arc::new(Sphere {
         center: Point3 {
@@ -184,10 +184,10 @@ pub fn random_int(min: i32, max: i32) -> i32 {
 }
 pub fn two_spheres() -> HittableList {
     let mut objects = HittableList::new();
-    let checker = Box::new(CheckerTexture {
-        even: Box::new(SolidColor::new(Color { e: (0.2, 0.3, 0.1) })),
-        odd: Box::new(SolidColor::new(Color { e: (0.9, 0.9, 0.9) })),
-    });
+    let checker = CheckerTexture {
+        even: SolidColor::new(Color { e: (0.2, 0.3, 0.1) }),
+        odd: SolidColor::new(Color { e: (0.9, 0.9, 0.9) }),
+    };
     objects.add(Arc::new(Sphere {
         center: Point3 {
             e: (0.0, -10.0, 0.0),
@@ -195,10 +195,10 @@ pub fn two_spheres() -> HittableList {
         radius: 10.0,
         mat_ptr: Arc::new(Lambertian { albedo: checker }),
     }));
-    let checker = Box::new(CheckerTexture {
-        even: Box::new(SolidColor::new(Color { e: (0.2, 0.3, 0.1) })),
-        odd: Box::new(SolidColor::new(Color { e: (0.9, 0.9, 0.9) })),
-    });
+    let checker = CheckerTexture {
+        even: SolidColor::new(Color { e: (0.2, 0.3, 0.1) }),
+        odd: SolidColor::new(Color { e: (0.9, 0.9, 0.9) }),
+    };
     objects.add(Arc::new(Sphere {
         center: Point3 {
             e: (0.0, 10.0, 0.0),
@@ -210,10 +210,10 @@ pub fn two_spheres() -> HittableList {
 }
 pub fn two_perlin_sphere() -> HittableList {
     let mut objects = HittableList::new();
-    let pertext = Box::new(NoiseTexture {
+    let pertext = NoiseTexture {
         noise: Perlin::new(),
         scale: 4.0,
-    });
+    };
     objects.add(Arc::new(Sphere {
         center: Point3 {
             e: (0.0, -1000.0, 0.0),
@@ -221,10 +221,10 @@ pub fn two_perlin_sphere() -> HittableList {
         radius: 1000.0,
         mat_ptr: Arc::new(Lambertian { albedo: pertext }),
     }));
-    let pertext = Box::new(NoiseTexture {
+    let pertext = NoiseTexture {
         noise: Perlin::new(),
         scale: 4.0,
-    });
+    };
     objects.add(Arc::new(Sphere {
         center: Point3 { e: (0.0, 2.0, 0.0) },
         radius: 2.0,
@@ -235,7 +235,7 @@ pub fn two_perlin_sphere() -> HittableList {
 pub fn earth() -> HittableList {
     let mut objects = HittableList::new();
     let path = std::path::Path::new("raytracer/src/earthmap.jpg");
-    let earth_texture = Box::new(ImageTexture::new(path));
+    let earth_texture = ImageTexture::new(path);
 
     let earth_surface = Arc::new(Lambertian {
         albedo: earth_texture,
@@ -249,10 +249,10 @@ pub fn earth() -> HittableList {
 }
 pub fn simple_light() -> HittableList {
     let mut objects = HittableList::new();
-    let pertext = Box::new(NoiseTexture {
+    let pertext = NoiseTexture {
         noise: Perlin::new(),
         scale: 4.0,
-    });
+    };
     objects.add(Arc::new(Sphere {
         center: Point3 {
             e: (0.0, -1000.0, 0.0),
@@ -260,10 +260,10 @@ pub fn simple_light() -> HittableList {
         radius: 1000.0,
         mat_ptr: Arc::new(Lambertian { albedo: pertext }),
     }));
-    let pertext = Box::new(NoiseTexture {
+    let pertext = NoiseTexture {
         noise: Perlin::new(),
         scale: 4.0,
-    });
+    };
     objects.add(Arc::new(Sphere {
         center: Point3 { e: (0.0, 2.0, 0.0) },
         radius: 2.0,
@@ -288,25 +288,25 @@ pub fn simple_light() -> HittableList {
 pub fn cornell_box() -> HittableList {
     let mut objects = HittableList::new();
     let red = Arc::new(Lambertian {
-        albedo: Box::new(SolidColor {
+        albedo: SolidColor {
             color_value: Color {
                 e: (0.65, 0.05, 0.05),
             },
-        }),
+        },
     });
     let white = Arc::new(Lambertian {
-        albedo: Box::new(SolidColor {
+        albedo: SolidColor {
             color_value: Color {
                 e: (0.73, 0.73, 0.73),
             },
-        }),
+        },
     });
     let green = Arc::new(Lambertian {
-        albedo: Box::new(SolidColor {
+        albedo: SolidColor {
             color_value: Color {
                 e: (0.12, 0.45, 0.15),
             },
-        }),
+        },
     });
     let light = Arc::new(DiffuseLight::new(Color {
         e: (15.0, 15.0, 15.0),
@@ -359,14 +359,14 @@ pub fn cornell_box() -> HittableList {
         k: 555.0,
         mp: white.clone(),
     }));
-    let box1 = Arc::new(MyBox::new(
+    let box1 =MyBox::new(
         &Point3 { e: (0.0, 0.0, 0.0) },
         &Point3 {
             e: (165.0, 330.0, 165.0),
         },
         white.clone(),
-    ));
-    let box1 = Arc::new(RotateY::new(box1, 15.0));
+    );
+    let box1 = RotateY::new(box1, 15.0);
     let box1 = Arc::new(Translate {
         offset: Vec3 {
             e: (265.0, 0.0, 295.0),
@@ -375,14 +375,14 @@ pub fn cornell_box() -> HittableList {
     });
 
     objects.add(box1);
-    let box2 = Arc::new(MyBox::new(
+    let box2 = MyBox::new(
         &Point3 { e: (0.0, 0.0, 0.0) },
         &Point3 {
             e: (165.0, 165.0, 165.0),
         },
         white,
-    ));
-    let box2 = Arc::new(RotateY::new(box2, -18.0));
+    );
+    let box2 = RotateY::new(box2, -18.0);
     let box2 = Arc::new(Translate {
         offset: Vec3 {
             e: (130.0, 0.0, 65.0),
@@ -395,25 +395,25 @@ pub fn cornell_box() -> HittableList {
 pub fn cornell_box_smoke() -> HittableList {
     let mut objects = HittableList::new();
     let red = Arc::new(Lambertian {
-        albedo: Box::new(SolidColor {
+        albedo: SolidColor {
             color_value: Color {
                 e: (0.65, 0.05, 0.05),
             },
-        }),
+        },
     });
     let white = Arc::new(Lambertian {
-        albedo: Box::new(SolidColor {
+        albedo: SolidColor {
             color_value: Color {
                 e: (0.73, 0.73, 0.73),
             },
-        }),
+        },
     });
     let green = Arc::new(Lambertian {
-        albedo: Box::new(SolidColor {
+        albedo: SolidColor {
             color_value: Color {
                 e: (0.12, 0.45, 0.15),
             },
-        }),
+        },
     });
     let light = Arc::new(DiffuseLight::new(Color { e: (7.0, 7.0, 7.0) }));
     objects.add(Arc::new(YzRect {
@@ -464,14 +464,14 @@ pub fn cornell_box_smoke() -> HittableList {
         k: 555.0,
         mp: white.clone(),
     }));
-    let box1 = Arc::new(MyBox::new(
+    let box1 = MyBox::new(
         &Point3 { e: (0.0, 0.0, 0.0) },
         &Point3 {
             e: (165.0, 330.0, 165.0),
         },
         white.clone(),
-    ));
-    let box1 = Arc::new(RotateY::new(box1, 15.0));
+    );
+    let box1 = RotateY::new(box1, 15.0);
     let box1 = Arc::new(Translate {
         offset: Vec3 {
             e: (265.0, 0.0, 295.0),
@@ -482,16 +482,16 @@ pub fn cornell_box_smoke() -> HittableList {
     objects.add(Arc::new(ConstantMedium::new(
         box1,
         0.01,
-        Box::new(SolidColor::new(Color { e: (0.0, 0.0, 0.0) })),
+        SolidColor::new(Color { e: (0.0, 0.0, 0.0) }),
     )));
-    let box2 = Arc::new(MyBox::new(
+    let box2 =MyBox::new(
         &Point3 { e: (0.0, 0.0, 0.0) },
         &Point3 {
             e: (165.0, 165.0, 165.0),
         },
         white,
-    ));
-    let box2 = Arc::new(RotateY::new(box2, -18.0));
+    );
+    let box2 = RotateY::new(box2, -18.0);
     let box2 = Arc::new(Translate {
         offset: Vec3 {
             e: (130.0, 0.0, 65.0),
@@ -501,16 +501,16 @@ pub fn cornell_box_smoke() -> HittableList {
     objects.add(Arc::new(ConstantMedium::new(
         box2,
         0.01,
-        Box::new(SolidColor::new(Color { e: (1.0, 1.0, 1.0) })),
+        SolidColor::new(Color { e: (1.0, 1.0, 1.0) }),
     )));
     objects
 }
 pub fn final_scene() -> HittableList {
     let mut boxes1 = HittableList::new();
     let ground = Arc::new(Lambertian {
-        albedo: Box::new(SolidColor::new(Color {
+        albedo: SolidColor::new(Color {
             e: (0.48, 0.83, 0.53),
-        })),
+        }),
     });
     let box_per_side = 20;
     for i in 0..box_per_side {
@@ -556,9 +556,9 @@ pub fn final_scene() -> HittableList {
             e: (30.0, 0.0, 0.0),
         };
     let moving_sphere_material = Arc::new(Lambertian {
-        albedo: Box::new(SolidColor {
+        albedo: SolidColor {
             color_value: Color { e: (0.7, 0.3, 0.1) },
-        }),
+        },
     });
     objects.add(Arc::new(MovingSphere {
         center0: center1_,
@@ -596,7 +596,7 @@ pub fn final_scene() -> HittableList {
     objects.add(Arc::new(ConstantMedium::new(
         boundary,
         0.2,
-        Box::new(SolidColor::new(Color { e: (0.2, 0.4, 0.9) })),
+        SolidColor::new(Color { e: (0.2, 0.4, 0.9) }),
     )));
     boundary = Arc::new(Sphere {
         center: Point3 { e: (0.0, 0.0, 0.0) },
@@ -606,11 +606,11 @@ pub fn final_scene() -> HittableList {
     objects.add(Arc::new(ConstantMedium::new(
         boundary,
         0.0001,
-        Box::new(SolidColor::new(Color { e: (1.0, 1.0, 1.0) })),
+        SolidColor::new(Color { e: (1.0, 1.0, 1.0) }),
     )));
     let path = std::path::Path::new("raytracer/src/earthmap.jpg");
     let emat = Arc::new(Lambertian {
-        albedo: Box::new(ImageTexture::new(path)),
+        albedo: ImageTexture::new(path),
     });
     objects.add(Arc::new(Sphere {
         center: Point3 {
@@ -619,10 +619,10 @@ pub fn final_scene() -> HittableList {
         radius: 100.0,
         mat_ptr: emat,
     }));
-    let pertext = Box::new(NoiseTexture {
+    let pertext = NoiseTexture {
         noise: Perlin::new(),
         scale: 0.1,
-    });
+    };
     objects.add(Arc::new(Sphere {
         center: Point3 {
             e: (220.0, 280.0, 300.0),
@@ -634,9 +634,9 @@ pub fn final_scene() -> HittableList {
     let mut boxes2 = HittableList::new();
 
     let white = Arc::new(Lambertian {
-        albedo: Box::new(SolidColor::new(Color {
+        albedo: SolidColor::new(Color {
             e: (0.73, 0.73, 0.73),
-        })),
+        }),
     });
 
     let ns = 1000;
@@ -653,10 +653,10 @@ pub fn final_scene() -> HittableList {
         offset: Vec3 {
             e: (-100.0, 270.0, 395.0),
         },
-        ptr: Arc::new(RotateY::new(
-            Arc::new(BvhNode::new_nodes(boxes2.objects, 0, end, 0.0, 1.0)),
+        ptr:RotateY::new(
+            BvhNode::new_nodes(boxes2.objects, 0, end, 0.0, 1.0),
             15.0,
-        )),
+        ),
     }));
     objects
 }
