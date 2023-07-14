@@ -13,15 +13,29 @@ pub struct BvhNode {
     pub box0: AABB,
 }
 impl Hittable for BvhNode {
-    fn hit(&self, r: &Ray, t_min: f64, t_max: f64, rec: &mut HitRecord) -> bool {
+    fn hit(&self, r: &Ray, t_min: f64, t_max: f64) -> Option<HitRecord> {
         if !(self.box0.hit(r, t_min, t_max)) {
-            return false;
+            return None;
         }
-        let hit_left = self.left.hit(r, t_min, t_max, rec);
+        let mut rec = HitRecord::new();
+        let hit_left = self.left.hit(r, t_min, t_max);
+        let mut hit_any = false;
+        if hit_left.is_some() {
+            hit_any=true;
+            rec = hit_left.unwrap();
+        }
         let hit_right = self
             .right
-            .hit(r, t_min, if hit_left { rec.t } else { t_max }, rec);
-        hit_left || hit_right
+            .hit(r, t_min, if hit_any { rec.t } else { t_max });
+        if hit_right.is_some() {
+            hit_any=true;
+            rec = hit_right.unwrap()
+        };
+        if hit_any {
+            Some(rec)
+        } else {
+            None
+        }
     }
     fn bounding_box(&self, _time0: f64, _time1: f64, output_box: &mut AABB) -> bool {
         *output_box = self.box0;

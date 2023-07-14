@@ -75,11 +75,13 @@ use crate::vec3::Vec3;
 }*/
 
 fn ray_color(r: &Ray, background: Color, world: &BvhNode, depth: i32) -> Color {
-    let mut rec: HitRecord = HitRecord::new();
+    let rec: HitRecord;
     if depth <= 0 {
         return Color { e: (0.0, 0.0, 0.0) };
     }
-    if world.hit(r, 0.001, INFINITY, &mut rec) {
+    let  w=world.hit(r, 0.001, INFINITY);
+    if  w.is_some() {
+        rec=w.unwrap();
         let mut scattered: Ray = Ray {
             orig: (Vec3::new()),
             dir: (Vec3::new()),
