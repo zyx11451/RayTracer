@@ -20,15 +20,15 @@ impl Hittable for BvhNode {
         let mut rec = HitRecord::new();
         let hit_left = self.left.hit(r, t_min, t_max);
         let mut hit_any = false;
-        if hit_left.is_some() {
-            hit_any=true;
+        if let Some(..) = hit_left {
+            hit_any = true;
             rec = hit_left.unwrap();
         }
         let hit_right = self
             .right
             .hit(r, t_min, if hit_any { rec.t } else { t_max });
-        if hit_right.is_some() {
-            hit_any=true;
+        if let Some(..) = hit_right {
+            hit_any = true;
             rec = hit_right.unwrap()
         };
         if hit_any {

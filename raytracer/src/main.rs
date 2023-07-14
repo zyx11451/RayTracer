@@ -79,9 +79,9 @@ fn ray_color(r: &Ray, background: Color, world: &BvhNode, depth: i32) -> Color {
     if depth <= 0 {
         return Color { e: (0.0, 0.0, 0.0) };
     }
-    let  w=world.hit(r, 0.001, INFINITY);
-    if  w.is_some() {
-        rec=w.unwrap();
+    let w = world.hit(r, 0.001, INFINITY);
+    if let Some(..) = w {
+        rec = w.unwrap();
         let mut scattered: Ray = Ray {
             orig: (Vec3::new()),
             dir: (Vec3::new()),

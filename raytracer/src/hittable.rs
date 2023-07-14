@@ -89,7 +89,7 @@ impl Hittable for HittableList {
         let mut closest_so_far = t_max;
         for object in &self.objects {
             let k = object.hit(r, t_min, closest_so_far);
-            if k.is_some() {
+            if let Some(..) = k {
                 temp_rec = k.unwrap();
                 hit_anything = true;
                 closest_so_far = temp_rec.t;
@@ -269,7 +269,7 @@ impl<M: Clone + Material + 'static> Hittable for XyRect<M> {
         if x < self.x0 || x > self.x1 || y < self.y0 || y > self.y1 {
             return None;
         }
-        let mut rec=HitRecord::new();
+        let mut rec = HitRecord::new();
         rec.u = (x - self.x0) / (self.x1 - self.x0);
         rec.v = (y - self.y0) / (self.y1 - self.y0);
         rec.t = t;
@@ -310,7 +310,7 @@ impl<M: 'static + Clone + Material> Hittable for XzRect<M> {
         if x < self.x0 || x > self.x1 || z < self.z0 || z > self.z1 {
             return None;
         }
-        let mut rec=HitRecord::new();
+        let mut rec = HitRecord::new();
         rec.u = (x - self.x0) / (self.x1 - self.x0);
         rec.v = (z - self.z0) / (self.z1 - self.z0);
         rec.t = t;
@@ -351,7 +351,7 @@ impl<M: 'static + Clone + Material> Hittable for YzRect<M> {
         if y < self.y0 || y > self.y1 || z < self.z0 || z > self.z1 {
             return None;
         }
-        let mut rec=HitRecord::new();
+        let mut rec = HitRecord::new();
         rec.u = (y - self.y0) / (self.y1 - self.y0);
         rec.v = (z - self.z0) / (self.z1 - self.z0);
         rec.t = t;
@@ -463,11 +463,9 @@ impl<H: Hittable> Hittable for Translate<H> {
             dir: r.dir,
             time: r.time,
         };
-        let k=self.ptr.hit(&moved_r, t_min, t_max);
-        if k.is_none() {
-            return None;
-        }
-        let mut rec=k.unwrap();
+        let k = self.ptr.hit(&moved_r, t_min, t_max);
+        k.as_ref()?;
+        let mut rec = k.unwrap();
         rec.p += self.offset;
         rec.set_face_normal(&moved_r, rec.normal);
         Some(rec)
@@ -550,11 +548,9 @@ impl<H: Hittable> Hittable for RotateY<H> {
             dir: direction,
             time: r.time,
         };
-        let k=self.ptr.hit(&rotated_r, t_min, t_max);
-        if k.is_none() {
-            return None;
-        }
-        let mut rec=k.unwrap(); 
+        let k = self.ptr.hit(&rotated_r, t_min, t_max);
+        k.as_ref()?;
+        let mut rec = k.unwrap();
         let mut p = rec.p;
         let mut normal = rec.normal;
         p.e.0 = self.cos_theta * rec.p.e.0 + self.sin_theta * rec.p.e.2;
@@ -586,19 +582,13 @@ impl<H: Hittable, T: Clone + Texture> ConstantMedium<H, Isotropic<T>> {
 }
 impl<H: Hittable, T: 'static + Clone + Texture> Hittable for ConstantMedium<H, Isotropic<T>> {
     fn hit(&self, r: &Ray, t_min: f64, t_max: f64) -> Option<HitRecord> {
-        let mut rec1 ;
-        let mut rec2 ;
-        let k1=self.boundary.hit(r, -INFINITY, INFINITY);
-        
-        if k1.is_none() {
-            return None;
-        }
-        rec1=k1.unwrap();
-        let k2=self.boundary.hit(r, rec1.t + 0.0001, INFINITY);
-        if k2.is_none() {
-            return None;
-        }
-        rec2=k2.unwrap();
+        let k1 = self.boundary.hit(r, -INFINITY, INFINITY);
+
+        k1.as_ref()?;
+        let mut rec1 = k1.unwrap();
+        let k2 = self.boundary.hit(r, rec1.t + 0.0001, INFINITY);
+        k2.as_ref()?;
+        let mut rec2 = k2.unwrap();
         if rec1.t < t_min {
             rec1.t = t_min;
         }
@@ -617,7 +607,7 @@ impl<H: Hittable, T: 'static + Clone + Texture> Hittable for ConstantMedium<H, I
         if hit_distance > distance_inside_boundary {
             return None;
         }
-        let mut rec=HitRecord::new();
+        let mut rec = HitRecord::new();
         rec.t = rec1.t + hit_distance / ray_length;
         rec.p = r.at(rec.t);
         rec.normal = Vec3 { e: (1.0, 0.0, 0.0) };

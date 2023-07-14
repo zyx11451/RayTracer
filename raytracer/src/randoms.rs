@@ -269,7 +269,7 @@ pub fn simple_light() -> HittableList {
         radius: 2.0,
         mat_ptr: Lambertian { albedo: pertext },
     }));
-    let difflight =DiffuseLight::new(Color { e: (4.0, 4.0, 4.0) });
+    let difflight = DiffuseLight::new(Color { e: (4.0, 4.0, 4.0) });
     objects.add(Arc::new(XyRect {
         x0: 3.0,
         x1: 5.0,
@@ -540,7 +540,7 @@ pub fn final_scene() -> HittableList {
         1.0,
     )));
     //objects.add(boxes1);
-    let light =DiffuseLight::new(Color { e: (7.0, 7.0, 7.0) });
+    let light = DiffuseLight::new(Color { e: (7.0, 7.0, 7.0) });
     objects.add(Arc::new(XzRect {
         x0: 123.0,
         x1: 423.0,
@@ -594,7 +594,7 @@ pub fn final_scene() -> HittableList {
         mat_ptr: Dielectric { ir: 1.5 },
     });
     objects.add(boundary);
-    let mut boundary =Sphere {
+    let mut boundary = Sphere {
         center: Point3 {
             e: (360.0, 150.0, 145.0),
         },

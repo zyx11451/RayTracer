@@ -17,10 +17,10 @@ pub trait Material {
     }
 }
 #[derive(Clone)]
-pub struct Lambertian <T:Texture>{
+pub struct Lambertian<T: Texture> {
     pub albedo: T,
 }
-impl<T:Texture> Material for Lambertian<T> {
+impl<T: Texture> Material for Lambertian<T> {
     fn scatter(
         &self,
         r_in: &Ray,
@@ -107,7 +107,7 @@ impl Material for Dielectric {
     }
 }
 #[derive(Clone)]
-pub struct DiffuseLight<T:Texture> {
+pub struct DiffuseLight<T: Texture> {
     pub emit: T,
 }
 impl DiffuseLight<SolidColor> {
@@ -117,7 +117,7 @@ impl DiffuseLight<SolidColor> {
         }
     }
 }
-impl<T:Texture> Material for DiffuseLight<T> {
+impl<T: Texture> Material for DiffuseLight<T> {
     fn scatter(
         &self,
         _r_in: &Ray,
@@ -132,7 +132,7 @@ impl<T:Texture> Material for DiffuseLight<T> {
     }
 }
 #[derive(Clone)]
-pub struct Isotropic <T:Texture> {
+pub struct Isotropic<T: Texture> {
     pub albedo: T,
 }
 impl Isotropic<SolidColor> {
@@ -142,7 +142,7 @@ impl Isotropic<SolidColor> {
         }
     }
 }
-impl<T:Texture> Material for Isotropic<T> {
+impl<T: Texture> Material for Isotropic<T> {
     fn scatter(
         &self,
         r_in: &Ray,
