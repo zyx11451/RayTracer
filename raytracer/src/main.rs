@@ -17,7 +17,6 @@ use indicatif::ProgressBar;
 //use std::f64::consts::PI;
 use std::f64::INFINITY;
 use std::ops::AddAssign;
-//use std::rc::Rc;
 use std::sync::Arc;
 use std::sync::Mutex;
 use std::thread;
@@ -47,32 +46,6 @@ use crate::ray::Ray;
 use crate::vec3::Color;
 use crate::vec3::Point3;
 use crate::vec3::Vec3;
-
-/*fn ray_color(r: &Ray,background: Color, world: &HittableList, depth: i32) -> Color {
-    let mut rec: HitRecord = HitRecord::new();
-    if depth <= 0 {
-        return Color { e: (0.0, 0.0, 0.0) };
-    }
-    if world.hit(r, 0.001, INFINITY, &mut rec) {
-        let mut scattered: Ray = Ray {
-            orig: (Vec3::new()),
-            dir: (Vec3::new()),
-            time: 0.0,
-        };
-        let mut attenuation: Color = Color::new();
-        let emitted = rec.mat_ptr.emitted(rec.u, rec.v, &rec.p);
-        if rec
-            .mat_ptr
-            .scatter(r, &rec, &mut attenuation, &mut scattered)
-        {
-            emitted + attenuation * ray_color(&scattered, background, world, depth - 1)
-        } else {
-            emitted
-        }
-    } else {
-        background
-    }
-}*/
 
 fn ray_color(r: &Ray, background: Color, world: &BvhNode, depth: i32) -> Color {
     let rec: HitRecord;
@@ -111,7 +84,7 @@ fn main() {
     let width = 800;
     let height = ((width as f64) / aspect_ratio) as u32;
     let quality = 100;
-    let samples_per_pixel = 200;
+    let samples_per_pixel = 10000;
     let max_depth = 50;
     let img: RgbImage = ImageBuffer::new(width, height);
     //World
@@ -142,7 +115,6 @@ fn main() {
     //Render
     let thread_num = 20; //必须是图像高度的因数
     let main_progress = Arc::new(Mutex::new(MultiProgress::new()));
-    //let b = Arc::new(world);
     let bvh_a = Arc::new(bvh);
     let im = Arc::new(Mutex::new(img));
     let mut handles = vec![];
