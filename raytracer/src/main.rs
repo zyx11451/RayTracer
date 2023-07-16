@@ -111,7 +111,7 @@ fn main() {
     let width = 800;
     let height = ((width as f64) / aspect_ratio) as u32;
     let quality = 100;
-    let samples_per_pixel = 200;
+    let samples_per_pixel = 10000;
     let max_depth = 50;
     let img: RgbImage = ImageBuffer::new(width, height);
     //World

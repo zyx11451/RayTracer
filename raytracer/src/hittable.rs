@@ -17,6 +17,7 @@ use std::sync::Arc;
 use std::vec::Vec;
 
 static NULL_MATERIAL: Dielectric = Dielectric { ir: 0.0 };
+
 pub trait Hittable {
     fn hit(&self, r: &Ray, t_min: f64, t_max: f64) -> Option<HitRecord>;
     fn bounding_box(&self, time0: f64, time1: f64, output_box: &mut AABB) -> bool;
@@ -57,7 +58,7 @@ impl<'a> Default for HitRecord<'a> {
         Self::new()
     }
 }
-
+#[derive(Clone)]
 pub struct HittableList {
     pub objects: Vec<Arc<dyn Hittable>>,
 }
@@ -181,6 +182,7 @@ impl<M: 'static + Clone + Material> Hittable for Sphere<M> {
         true
     }
 }
+#[derive(Clone)]
 pub struct MovingSphere<M: Clone + Material> {
     pub center0: Point3,
     pub center1: Point3,
@@ -250,6 +252,7 @@ impl<M: 'static + Clone + Material> Hittable for MovingSphere<M> {
         true
     }
 }
+#[derive(Clone)]
 pub struct XyRect<M: Clone + Material> {
     pub x0: f64,
     pub x1: f64,
@@ -291,6 +294,7 @@ impl<M: Clone + Material + 'static> Hittable for XyRect<M> {
         true
     }
 }
+#[derive(Clone)]
 pub struct XzRect<M: Clone + Material> {
     pub x0: f64,
     pub x1: f64,
@@ -332,6 +336,7 @@ impl<M: 'static + Clone + Material> Hittable for XzRect<M> {
         true
     }
 }
+#[derive(Clone)]
 pub struct YzRect<M: Clone + Material> {
     pub y0: f64,
     pub y1: f64,
@@ -373,6 +378,7 @@ impl<M: 'static + Clone + Material> Hittable for YzRect<M> {
         true
     }
 }
+#[derive(Clone)]
 pub struct MyBox<M: Clone + Material> {
     pub box_min: Point3,
     pub box_max: Point3,
@@ -452,6 +458,7 @@ impl<M: Clone + Material> Hittable for MyBox<M> {
         true
     }
 }
+#[derive(Clone)]
 pub struct Translate<H: Hittable> {
     pub offset: Vec3,
     pub ptr: H,
@@ -481,6 +488,7 @@ impl<H: Hittable> Hittable for Translate<H> {
         true
     }
 }
+#[derive(Clone)]
 pub struct RotateY<H: Hittable> {
     pub ptr: H,
     pub sin_theta: f64,
@@ -566,6 +574,7 @@ impl<H: Hittable> Hittable for RotateY<H> {
         self.hasbox
     }
 }
+#[derive(Clone)]
 pub struct ConstantMedium<H: Hittable, M: Material> {
     pub boundary: H,
     pub phase_function: M,
