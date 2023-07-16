@@ -13,7 +13,6 @@ use super::vec3::Point3;
 use super::vec3::Vec3;
 use std::f64::consts::PI;
 use std::f64::INFINITY;
-use std::sync::Arc;
 use std::vec::Vec;
 
 static NULL_MATERIAL: Dielectric = Dielectric { ir: 0.0 };
@@ -58,14 +57,14 @@ impl<'a> Default for HitRecord<'a> {
         Self::new()
     }
 }
-#[derive(Clone)]
+
 pub struct HittableList {
-    pub objects: Vec<Arc<dyn Hittable>>,
+    pub objects: Vec<Box<dyn Hittable>>,
 }
 unsafe impl Send for HittableList {}
 unsafe impl Sync for HittableList {}
 impl HittableList {
-    pub fn add(&mut self, object: Arc<dyn Hittable>) {
+    pub fn add(&mut self, object: Box<dyn Hittable>) {
         self.objects.push(object);
     }
     pub fn clear(&mut self) {
@@ -378,7 +377,7 @@ impl<M: 'static + Clone + Material> Hittable for YzRect<M> {
         true
     }
 }
-#[derive(Clone)]
+
 pub struct MyBox<M: Clone + Material> {
     pub box_min: Point3,
     pub box_max: Point3,
@@ -395,7 +394,7 @@ impl<M: 'static + Clone + Material> MyBox<M> {
             mat_ptr: ptr.clone(),
             sides: HittableList::new(),
         };
-        ans.sides.add(Arc::new(XyRect {
+        ans.sides.add(Box::new(XyRect {
             x0: p0.e.0,
             x1: p1.e.0,
             y0: p0.e.1,
@@ -403,7 +402,7 @@ impl<M: 'static + Clone + Material> MyBox<M> {
             k: p1.e.2,
             mp: ptr.clone(),
         }));
-        ans.sides.add(Arc::new(XyRect {
+        ans.sides.add(Box::new(XyRect {
             x0: p0.e.0,
             x1: p1.e.0,
             y0: p0.e.1,
@@ -411,7 +410,7 @@ impl<M: 'static + Clone + Material> MyBox<M> {
             k: p0.e.2,
             mp: ptr.clone(),
         }));
-        ans.sides.add(Arc::new(XzRect {
+        ans.sides.add(Box::new(XzRect {
             x0: p0.e.0,
             x1: p1.e.0,
             z0: p0.e.2,
@@ -419,7 +418,7 @@ impl<M: 'static + Clone + Material> MyBox<M> {
             k: p1.e.1,
             mp: ptr.clone(),
         }));
-        ans.sides.add(Arc::new(XzRect {
+        ans.sides.add(Box::new(XzRect {
             x0: p0.e.0,
             x1: p1.e.0,
             z0: p0.e.2,
@@ -427,7 +426,7 @@ impl<M: 'static + Clone + Material> MyBox<M> {
             k: p0.e.1,
             mp: ptr.clone(),
         }));
-        ans.sides.add(Arc::new(YzRect {
+        ans.sides.add(Box::new(YzRect {
             y0: p0.e.1,
             y1: p1.e.1,
             z0: p0.e.2,
@@ -435,7 +434,7 @@ impl<M: 'static + Clone + Material> MyBox<M> {
             k: p1.e.0,
             mp: ptr.clone(),
         }));
-        ans.sides.add(Arc::new(YzRect {
+        ans.sides.add(Box::new(YzRect {
             y0: p0.e.1,
             y1: p1.e.1,
             z0: p0.e.2,

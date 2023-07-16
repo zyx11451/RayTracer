@@ -1,4 +1,4 @@
-use std::{cmp::Ordering, sync::Arc};
+use std::cmp::Ordering;
 
 use crate::{
     aabb::{surrounding_box, AABB},
@@ -8,8 +8,8 @@ use crate::{
     vec3::Vec3,
 };
 pub struct BvhNode {
-    pub left: Arc<dyn Hittable>,
-    pub right: Arc<dyn Hittable>,
+    pub left: Option<Box<dyn Hittable>>,
+    pub right: Option<Box<dyn Hittable>>,
     pub box0: AABB,
 }
 impl Hittable for BvhNode {
@@ -18,15 +18,25 @@ impl Hittable for BvhNode {
             return None;
         }
         let mut rec = HitRecord::new();
-        let hit_left = self.left.hit(r, t_min, t_max);
+        let hit_left = if self.left.is_some() {
+            self.left.as_ref().unwrap().hit(r, t_min, t_max)
+        } else {
+            None
+        };
         let mut hit_any = false;
         if let Some(..) = hit_left {
             hit_any = true;
             rec = hit_left.unwrap();
         }
-        let hit_right = self
-            .right
-            .hit(r, t_min, if hit_any { rec.t } else { t_max });
+        let hit_right = if self.right.is_some() {
+            self.right
+                .as_ref()
+                .unwrap()
+                .hit(r, t_min, if hit_any { rec.t } else { t_max })
+        } else {
+            None
+        };
+
         if let Some(..) = hit_right {
             hit_any = true;
             rec = hit_right.unwrap()
@@ -44,16 +54,16 @@ impl Hittable for BvhNode {
 }
 impl BvhNode {
     pub fn new_nodes(
-        src_objects: Vec<Arc<dyn Hittable>>,
+        src_objects: &mut Vec<Box<dyn Hittable>>,
         start: u32,
         end: u32,
         time0: f64,
         time1: f64,
     ) -> Self {
-        let left_: Arc<dyn Hittable>;
-        let right_: Arc<dyn Hittable>;
+        let left_: Option<Box<dyn Hittable>>;
+        let right_: Option<Box<dyn Hittable>>;
 
-        let mut objects = src_objects.clone();
+        let objects = src_objects;
         let axis = random_int(0, 2);
         let comparator = if axis == 0 {
             box_x_compare
@@ -65,30 +75,29 @@ impl BvhNode {
 
         let object_span = end - start;
         if object_span == 1 {
-            left_ = (*objects)[start as usize].clone();
-            right_ = (*objects)[start as usize].clone();
+            left_ = Some(objects.remove(start as usize));
+            right_ = None;
         } else if object_span == 2 {
             if comparator(&objects[start as usize], &objects[(start + 1) as usize])
                 == Ordering::Less
             {
-                left_ = (*objects)[start as usize].clone();
-                right_ = (*objects)[(start + 1) as usize].clone();
+                right_ = Some(objects.remove((start + 1) as usize));
+                left_ = Some(objects.remove(start as usize));
             } else {
-                left_ = (*objects)[(start + 1) as usize].clone();
-                right_ = (*objects)[start as usize].clone();
+                left_ = Some(objects.remove((start + 1) as usize));
+                right_ = Some(objects.remove(start as usize));
             }
         } else {
             let objects_m = &mut objects[start as usize..end as usize];
             objects_m.sort_by(comparator);
+
             let mid = start + object_span / 2;
-            left_ = Arc::new(BvhNode::new_nodes(
-                objects.clone(),
-                start,
-                mid,
-                time0,
-                time1,
-            ));
-            right_ = Arc::new(BvhNode::new_nodes(objects, mid, end, time0, time1));
+            right_ = Some(Box::new(BvhNode::new_nodes(
+                objects, mid, end, time0, time1,
+            )));
+            left_ = Some(Box::new(BvhNode::new_nodes(
+                objects, start, mid, time0, time1,
+            )));
         }
         let mut box_left: AABB = AABB {
             minimum: Vec3::new(),
@@ -98,8 +107,19 @@ impl BvhNode {
             minimum: Vec3::new(),
             maximum: Vec3::new(),
         };
-        left_.bounding_box(time0, time1, &mut box_left);
-        right_.bounding_box(time0, time1, &mut box_right);
+        left_
+            .as_ref()
+            .unwrap()
+            .bounding_box(time0, time1, &mut box_left);
+        if right_.is_some() {
+            right_
+                .as_ref()
+                .unwrap()
+                .bounding_box(time0, time1, &mut box_right)
+        } else {
+            box_right = box_left;
+            false
+        };
         let box0_: AABB = surrounding_box(&box_left, &box_right);
         Self {
             left: left_,
@@ -108,7 +128,7 @@ impl BvhNode {
         }
     }
 }
-pub fn box_x_compare(a: &Arc<dyn Hittable>, b: &Arc<dyn Hittable>) -> Ordering {
+pub fn box_x_compare(a: &Box<dyn Hittable>, b: &Box<dyn Hittable>) -> Ordering {
     let mut box_a = AABB {
         minimum: Vec3::new(),
         maximum: Vec3::new(),
@@ -127,7 +147,7 @@ pub fn box_x_compare(a: &Arc<dyn Hittable>, b: &Arc<dyn Hittable>) -> Ordering {
         Ordering::Equal
     }
 }
-pub fn box_y_compare(a: &Arc<dyn Hittable>, b: &Arc<dyn Hittable>) -> Ordering {
+pub fn box_y_compare(a: &Box<dyn Hittable>, b: &Box<dyn Hittable>) -> Ordering {
     let mut box_a = AABB {
         minimum: Vec3::new(),
         maximum: Vec3::new(),
@@ -146,7 +166,7 @@ pub fn box_y_compare(a: &Arc<dyn Hittable>, b: &Arc<dyn Hittable>) -> Ordering {
         Ordering::Equal
     }
 }
-pub fn box_z_compare(a: &Arc<dyn Hittable>, b: &Arc<dyn Hittable>) -> Ordering {
+pub fn box_z_compare(a: &Box<dyn Hittable>, b: &Box<dyn Hittable>) -> Ordering {
     let mut box_a = AABB {
         minimum: Vec3::new(),
         maximum: Vec3::new(),

@@ -111,14 +111,14 @@ fn main() {
     let width = 800;
     let height = ((width as f64) / aspect_ratio) as u32;
     let quality = 100;
-    let samples_per_pixel = 10000;
+    let samples_per_pixel = 200;
     let max_depth = 50;
     let img: RgbImage = ImageBuffer::new(width, height);
     //World
     let background = Color { e: (0.0, 0.0, 0.0) };
-    let world: HittableList = final_scene();
+    let mut world: HittableList = final_scene();
     let end = world.objects.len() as u32;
-    let bvh = BvhNode::new_nodes(world.objects, 0, end, 0.0, 1.0);
+    let bvh = BvhNode::new_nodes(&mut world.objects, 0, end, 0.0, 1.0);
     //Camera
     let lookfrom: Point3 = Point3 {
         e: (478.0, 278.0, -600.0),
