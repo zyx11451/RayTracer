@@ -128,6 +128,7 @@ impl BvhNode {
         }
     }
 }
+#[allow(clippy::borrowed_box)]
 pub fn box_x_compare(a: &Box<dyn Hittable>, b: &Box<dyn Hittable>) -> Ordering {
     let mut box_a = AABB {
         minimum: Vec3::new(),
@@ -147,6 +148,7 @@ pub fn box_x_compare(a: &Box<dyn Hittable>, b: &Box<dyn Hittable>) -> Ordering {
         Ordering::Equal
     }
 }
+#[allow(clippy::borrowed_box)]
 pub fn box_y_compare(a: &Box<dyn Hittable>, b: &Box<dyn Hittable>) -> Ordering {
     let mut box_a = AABB {
         minimum: Vec3::new(),
@@ -166,6 +168,7 @@ pub fn box_y_compare(a: &Box<dyn Hittable>, b: &Box<dyn Hittable>) -> Ordering {
         Ordering::Equal
     }
 }
+#[allow(clippy::borrowed_box)]
 pub fn box_z_compare(a: &Box<dyn Hittable>, b: &Box<dyn Hittable>) -> Ordering {
     let mut box_a = AABB {
         minimum: Vec3::new(),
