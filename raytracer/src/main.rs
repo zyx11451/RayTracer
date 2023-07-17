@@ -28,9 +28,9 @@ use crate::bvh::BvhNode;
 use crate::camera::Camera;
 use crate::camera::NewCamMessage;
 use crate::hittable::Hittable;
-//use crate::randoms::cornell_box;
+use crate::randoms::cornell_box;
 //use crate::randoms::cornell_box_smoke;
-use crate::randoms::final_scene;
+//use crate::randoms::final_scene;
 //use crate::randoms::earth;
 //use crate::hittable::Sphere;
 //use crate::material::Dielectric;
@@ -61,12 +61,16 @@ fn ray_color(r: &Ray, background: Color, world: &BvhNode, depth: i32) -> Color {
             time: 0.0,
         };
         let mut attenuation: Color = Color::new();
+        let mut pdf = 1.0;
         let emitted = rec.mat_ptr.emitted(rec.u, rec.v, &rec.p);
         if rec
             .mat_ptr
-            .scatter(r, &rec, &mut attenuation, &mut scattered)
+            .scatter(r, &rec, &mut attenuation, &mut scattered, &mut pdf)
         {
-            emitted + attenuation * ray_color(&scattered, background, world, depth - 1)
+            emitted
+                + attenuation
+                    * (rec.mat_ptr.scattering_pdf(r, &rec, &mut scattered) / pdf)
+                    * ray_color(&scattered, background, world, depth - 1)
         } else {
             emitted
         }
@@ -76,25 +80,25 @@ fn ray_color(r: &Ray, background: Color, world: &BvhNode, depth: i32) -> Color {
 }
 fn main() {
     //
-    let path = std::path::Path::new("output/book2/test.jpg");
+    let path = std::path::Path::new("output/book3/test1.jpg");
     let prefix = path.parent().unwrap();
     std::fs::create_dir_all(prefix).expect("Cannot create all the parents");
     //Image
     let aspect_ratio: f64 = 1.0;
-    let width = 800;
+    let width = 600;
     let height = ((width as f64) / aspect_ratio) as u32;
     let quality = 100;
-    let samples_per_pixel = 10000;
+    let samples_per_pixel = 500;
     let max_depth = 50;
     let img: RgbImage = ImageBuffer::new(width, height);
     //World
     let background = Color { e: (0.0, 0.0, 0.0) };
-    let mut world: HittableList = final_scene();
+    let mut world: HittableList = cornell_box();
     let end = world.objects.len() as u32;
     let bvh = BvhNode::new_nodes(&mut world.objects, 0, end, 0.0, 1.0);
     //Camera
     let lookfrom: Point3 = Point3 {
-        e: (478.0, 278.0, -600.0),
+        e: (278.0, 278.0, -800.0),
     };
     let lookat: Point3 = Point3 {
         e: (278.0, 278.0, 0.0),
