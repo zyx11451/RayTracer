@@ -3,10 +3,10 @@ use std::f64::consts::PI;
 //随机相关和场景
 use crate::{
     bvh::BvhNode,
-    hittable::HittableList,
     hittable::{
         ConstantMedium, MovingSphere, MyBox, RotateY, Sphere, Translate, XyRect, XzRect, YzRect,
     },
+    hittable::{FlipFace, HittableList},
     material::{Dielectric, DiffuseLight, Lambertian, Metal},
     perlin::Perlin,
     texture::{CheckerTexture, ImageTexture, NoiseTexture, SolidColor},
@@ -338,13 +338,16 @@ pub fn cornell_box() -> HittableList {
         k: 0.0,
         mp: red,
     }));
-    objects.add(Box::new(XzRect {
-        x0: 213.0,
-        x1: 343.0,
-        z0: 227.0,
-        z1: 332.0,
-        k: 554.0,
-        mp: light,
+
+    objects.add(Box::new(FlipFace {
+        ptr: XzRect {
+            x0: 213.0,
+            x1: 343.0,
+            z0: 227.0,
+            z1: 332.0,
+            k: 554.0,
+            mp: light,
+        },
     }));
     objects.add(Box::new(XzRect {
         x0: 0.0,

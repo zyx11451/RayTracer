@@ -627,3 +627,18 @@ impl<H: Hittable, T: 'static + Clone + Texture> Hittable for ConstantMedium<H, I
         self.boundary.bounding_box(time0, time1, output_box)
     }
 }
+pub struct FlipFace<H: Hittable> {
+    pub ptr: H,
+}
+impl<H: Hittable> Hittable for FlipFace<H> {
+    fn hit(&self, r: &Ray, t_min: f64, t_max: f64) -> Option<HitRecord> {
+        let k = self.ptr.hit(r, t_min, t_max);
+        k.as_ref()?;
+        let mut rec = k.unwrap();
+        rec.front_face = !rec.front_face;
+        Some(rec)
+    }
+    fn bounding_box(&self, time0: f64, time1: f64, output_box: &mut AABB) -> bool {
+        self.ptr.bounding_box(time0, time1, output_box)
+    }
+}

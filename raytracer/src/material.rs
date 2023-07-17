@@ -20,7 +20,7 @@ pub trait Material {
     fn scattering_pdf(&self, _r_in: &Ray, _rec: &HitRecord, _scattered: &mut Ray) -> f64 {
         1.0
     }
-    fn emitted(&self, _u: f64, _v: f64, _p: &Point3) -> Color {
+    fn emitted(&self, _r_in: &Ray, _rec: &HitRecord, _u: f64, _v: f64, _p: &Point3) -> Color {
         Color { e: (0.0, 0.0, 0.0) }
     }
 }
@@ -158,8 +158,12 @@ impl<T: Texture> Material for DiffuseLight<T> {
     ) -> bool {
         false
     }
-    fn emitted(&self, u: f64, v: f64, p: &Point3) -> Color {
-        self.emit.value(u, v, p)
+    fn emitted(&self, _r_in: &Ray, rec: &HitRecord, u: f64, v: f64, p: &Point3) -> Color {
+        if rec.front_face {
+            self.emit.value(u, v, p)
+        } else {
+            Color { e: (0.0, 0.0, 0.0) }
+        }
     }
 }
 #[derive(Clone)]

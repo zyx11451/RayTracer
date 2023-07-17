@@ -63,7 +63,7 @@ fn ray_color(r: &Ray, background: Color, world: &BvhNode, depth: i32) -> Color {
         };
         let mut attenuation: Color = Color::new();
         let mut pdf = 1.0;
-        let emitted = rec.mat_ptr.emitted(rec.u, rec.v, &rec.p);
+        let emitted = rec.mat_ptr.emitted(r, &rec, rec.u, rec.v, &rec.p);
         if rec
             .mat_ptr
             .scatter(r, &rec, &mut attenuation, &mut scattered, &mut pdf)
@@ -105,7 +105,7 @@ fn ray_color(r: &Ray, background: Color, world: &BvhNode, depth: i32) -> Color {
 }
 fn main() {
     //
-    let path = std::path::Path::new("output/book3/image4.jpg");
+    let path = std::path::Path::new("output/book3/image5.jpg");
     let prefix = path.parent().unwrap();
     std::fs::create_dir_all(prefix).expect("Cannot create all the parents");
     //Image
