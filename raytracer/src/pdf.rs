@@ -2,7 +2,7 @@ use std::f64::consts::PI;
 
 use crate::{
     hittable::Hittable,
-    randoms::random_cosine_direction,
+    randoms::{random_cosine_direction, random_double},
     vec3::{mul_vec_dot, Onb, Point3, Vec3},
 };
 
@@ -36,5 +36,22 @@ impl<'a> Pdf for HittablePdf<'a> {
     }
     fn generate(&self) -> Vec3 {
         self.ptr.random(&self.o)
+    }
+}
+
+pub struct MixturePdf<P1: Pdf, P2: Pdf> {
+    pub p1: P1,
+    pub p2: P2,
+}
+impl<P1: Pdf, P2: Pdf> Pdf for MixturePdf<P1, P2> {
+    fn value(&self, direction: &Vec3) -> f64 {
+        0.5 * self.p1.value(direction) + 0.5 * self.p2.value(direction)
+    }
+    fn generate(&self) -> Vec3 {
+        if random_double(0.0, 1.0) < 0.5 {
+            self.p1.generate()
+        } else {
+            self.p2.generate()
+        }
     }
 }

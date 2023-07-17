@@ -15,11 +15,12 @@ use hittable::HittableList;
 use image::{ImageBuffer, RgbImage};
 use indicatif::MultiProgress;
 use indicatif::ProgressBar;
-//use pdf::CosinePdf;
+use pdf::CosinePdf;
 use pdf::HittablePdf;
+use pdf::MixturePdf;
 use pdf::Pdf;
 //use vec3::mul_vec_dot;
-//use vec3::Onb;
+use vec3::Onb;
 //use std::f64::consts::PI;
 use std::f64::INFINITY;
 use std::ops::AddAssign;
@@ -90,10 +91,24 @@ fn ray_color(
                 time: r.time,
             };
             pdf_val = p.value(&scattered.dir);*/
-            let p = HittablePdf {
+            /*let p = HittablePdf {
                 o: rec.p,
                 ptr: lights,
             };
+            scattered = Ray {
+                orig: rec.p,
+                dir: p.generate(),
+                time: r.time,
+            };
+            pdf_val = p.value(&scattered.dir);*/
+            let p1_ = HittablePdf {
+                o: rec.p,
+                ptr: lights,
+            };
+            let p2_ = CosinePdf {
+                uvw: Onb::build_from_w(&rec.normal),
+            };
+            let p = MixturePdf { p1: p1_, p2: p2_ };
             scattered = Ray {
                 orig: rec.p,
                 dir: p.generate(),
@@ -113,7 +128,7 @@ fn ray_color(
 }
 fn main() {
     //
-    let path = std::path::Path::new("output/book3/image7.jpg");
+    let path = std::path::Path::new("output/book3/image8.jpg");
     let prefix = path.parent().unwrap();
     std::fs::create_dir_all(prefix).expect("Cannot create all the parents");
     //Image
@@ -121,7 +136,7 @@ fn main() {
     let width = 600;
     let height = ((width as f64) / aspect_ratio) as u32;
     let quality = 100;
-    let samples_per_pixel = 10;
+    let samples_per_pixel = 1000;
     let max_depth = 50;
     let img: RgbImage = ImageBuffer::new(width, height);
     //World
