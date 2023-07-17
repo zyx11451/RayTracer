@@ -141,3 +141,31 @@ impl Default for Vec3 {
 }
 pub type Color = Vec3;
 pub type Point3 = Vec3;
+#[derive(Debug, Clone, Copy)]
+pub struct Onb {
+    pub axis_x: Vec3,
+    pub axis_y: Vec3,
+    pub axis_z: Vec3,
+}
+impl Onb {
+    pub fn local(&self, a: f64, b: f64, c: f64) -> Vec3 {
+        mul_num(self.axis_x, a) + mul_num(self.axis_y, b) + mul_num(self.axis_z, c)
+    }
+    pub fn local_vec(&self, a: &Vec3) -> Vec3 {
+        mul_num(self.axis_x, a.e.0) + mul_num(self.axis_y, a.e.1) + mul_num(self.axis_z, a.e.2)
+    }
+    pub fn build_from_w(n: &Vec3) -> Self {
+        let z = n.unit_vector();
+        let a = if z.e.0.abs() > 0.9 {
+            Vec3 { e: (0.0, 1.0, 0.0) }
+        } else {
+            Vec3 { e: (1.0, 0.0, 0.0) }
+        };
+        let y = mul_vec_cross(z, a).unit_vector();
+        Self {
+            axis_x: mul_vec_cross(z, y),
+            axis_y: y,
+            axis_z: z,
+        }
+    }
+}

@@ -1,8 +1,8 @@
 use std::f64::consts::PI;
 
-use crate::randoms::{min, random_double, random_in_semi_sphere, random_in_unit_sphere};
+use crate::randoms::{min, random_cosine_direction, random_double, random_in_unit_sphere};
 use crate::texture::{SolidColor, Texture};
-use crate::vec3::{mul_vec_dot, reflect, refract, Color, Point3, Vec3};
+use crate::vec3::{mul_vec_dot, reflect, refract, Color, Onb, Point3, Vec3};
 
 use crate::{hittable::HitRecord, ray::Ray};
 
@@ -47,16 +47,17 @@ impl<T: Texture> Material for Lambertian<T> {
             time: r_in.time,
         };
         *attenuation = self.albedo.value(rec.u, rec.v, &rec.p);
-        *pdf=mul_vec_dot(rec.normal, scattered.dir)/PI;
+        *pdf=mul_vec_dot(rec.normal, scattered.dir.unit_vector())/PI;
         true*/
-        let direction = random_in_semi_sphere(rec.normal);
+        let uvw = Onb::build_from_w(&rec.normal);
+        let direction = uvw.local_vec(&random_cosine_direction());
         *scattered = Ray {
             orig: (rec.p),
             dir: (direction),
             time: r_in.time,
         };
         *attenuation = self.albedo.value(rec.u, rec.v, &rec.p);
-        *pdf = 0.5 / PI;
+        *pdf = mul_vec_dot(uvw.axis_z, scattered.dir) / PI;
         true
     }
     fn scattering_pdf(&self, _r_in: &Ray, rec: &HitRecord, scattered: &mut Ray) -> f64 {
