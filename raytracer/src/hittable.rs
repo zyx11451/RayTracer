@@ -20,6 +20,12 @@ static NULL_MATERIAL: Dielectric = Dielectric { ir: 0.0 };
 pub trait Hittable {
     fn hit(&self, r: &Ray, t_min: f64, t_max: f64) -> Option<HitRecord>;
     fn bounding_box(&self, time0: f64, time1: f64, output_box: &mut AABB) -> bool;
+    fn pdf_value(&self, _o: &Point3, _v: &Vec3) -> f64 {
+        0.0
+    }
+    fn random(&self, _o: &Vec3) -> Vec3 {
+        Vec3 { e: (1.0, 0.0, 0.0) }
+    }
 }
 
 pub struct HitRecord<'a> {
@@ -333,6 +339,35 @@ impl<M: 'static + Clone + Material> Hittable for XzRect<M> {
             },
         };
         true
+    }
+    fn pdf_value(&self, o: &Point3, v: &Vec3) -> f64 {
+        let k = self.hit(
+            &Ray {
+                orig: *o,
+                dir: *v,
+                time: 0.0,
+            },
+            0.001,
+            INFINITY,
+        );
+        if k.is_none() {
+            return 0.0;
+        }
+        let rec = k.unwrap();
+        let area = (self.x1 - self.x0) * (self.z1 - self.z0);
+        let distance_squared = rec.t * rec.t * v.length_square();
+        let cosine = (mul_vec_dot(*v, rec.normal) / v.length()).abs();
+        distance_squared / (cosine * area)
+    }
+    fn random(&self, o: &Vec3) -> Vec3 {
+        let random_point = Point3 {
+            e: (
+                random_double(self.x0, self.x1),
+                self.k,
+                random_double(self.z0, self.z1),
+            ),
+        };
+        random_point - *o
     }
 }
 #[derive(Clone)]

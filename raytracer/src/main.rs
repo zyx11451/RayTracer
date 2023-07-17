@@ -15,10 +15,11 @@ use hittable::HittableList;
 use image::{ImageBuffer, RgbImage};
 use indicatif::MultiProgress;
 use indicatif::ProgressBar;
-use pdf::CosinePdf;
+//use pdf::CosinePdf;
+use pdf::HittablePdf;
 use pdf::Pdf;
 //use vec3::mul_vec_dot;
-use vec3::Onb;
+//use vec3::Onb;
 //use std::f64::consts::PI;
 use std::f64::INFINITY;
 use std::ops::AddAssign;
@@ -33,6 +34,8 @@ use crate::bvh::BvhNode;
 use crate::camera::Camera;
 use crate::camera::NewCamMessage;
 use crate::hittable::Hittable;
+use crate::hittable::XzRect;
+use crate::material::DiffuseLight;
 use crate::randoms::cornell_box;
 //use crate::randoms::cornell_box_smoke;
 //use crate::randoms::final_scene;
@@ -52,7 +55,13 @@ use crate::vec3::Color;
 use crate::vec3::Point3;
 use crate::vec3::Vec3;
 
-fn ray_color(r: &Ray, background: Color, world: &BvhNode, depth: i32) -> Color {
+fn ray_color(
+    r: &Ray,
+    lights: &dyn Hittable,
+    background: Color,
+    world: &BvhNode,
+    depth: i32,
+) -> Color {
     let rec: HitRecord;
     if depth <= 0 {
         return Color { e: (0.0, 0.0, 0.0) };
@@ -72,8 +81,18 @@ fn ray_color(r: &Ray, background: Color, world: &BvhNode, depth: i32) -> Color {
             .mat_ptr
             .scatter(r, &rec, &mut attenuation, &mut scattered, &mut pdf_val)
         {
-            let p = CosinePdf {
+            /*let p = CosinePdf {
                 uvw: Onb::build_from_w(&rec.normal),
+            };
+            scattered = Ray {
+                orig: rec.p,
+                dir: p.generate(),
+                time: r.time,
+            };
+            pdf_val = p.value(&scattered.dir);*/
+            let p = HittablePdf {
+                o: rec.p,
+                ptr: lights,
             };
             scattered = Ray {
                 orig: rec.p,
@@ -84,7 +103,7 @@ fn ray_color(r: &Ray, background: Color, world: &BvhNode, depth: i32) -> Color {
             emitted
                 + attenuation
                     * (rec.mat_ptr.scattering_pdf(r, &rec, &mut scattered) / pdf_val)
-                    * ray_color(&scattered, background, world, depth - 1)
+                    * ray_color(&scattered, lights, background, world, depth - 1)
         } else {
             emitted
         }
@@ -94,7 +113,7 @@ fn ray_color(r: &Ray, background: Color, world: &BvhNode, depth: i32) -> Color {
 }
 fn main() {
     //
-    let path = std::path::Path::new("output/book3/image6.jpg");
+    let path = std::path::Path::new("output/book3/image7.jpg");
     let prefix = path.parent().unwrap();
     std::fs::create_dir_all(prefix).expect("Cannot create all the parents");
     //Image
@@ -102,12 +121,22 @@ fn main() {
     let width = 600;
     let height = ((width as f64) / aspect_ratio) as u32;
     let quality = 100;
-    let samples_per_pixel = 500;
+    let samples_per_pixel = 10;
     let max_depth = 50;
     let img: RgbImage = ImageBuffer::new(width, height);
     //World
     let background = Color { e: (0.0, 0.0, 0.0) };
     let mut world: HittableList = cornell_box();
+    let lights = XzRect {
+        x0: 213.0,
+        x1: 343.0,
+        z0: 227.0,
+        z1: 332.0,
+        k: 554.0,
+        mp: DiffuseLight::new(Color {
+            e: (15.0, 15.0, 15.0),
+        }),
+    };
     let end = world.objects.len() as u32;
     let bvh = BvhNode::new_nodes(&mut world.objects, 0, end, 0.0, 1.0);
     //Camera
@@ -135,6 +164,7 @@ fn main() {
     let main_progress = Arc::new(Mutex::new(MultiProgress::new()));
     let bvh_a = Arc::new(bvh);
     let im = Arc::new(Mutex::new(img));
+    let lights = Arc::new(lights);
     let mut handles = vec![];
     for p in 0..thread_num {
         let progress = Arc::new(
@@ -144,6 +174,7 @@ fn main() {
         //let b_in_thread = b.clone();
         let bvh_a_in_thread = bvh_a.clone();
         let im_in_thread = im.clone();
+        let lights_in_thread = lights.clone();
         let each_thread = thread::spawn(move || {
             for j in (0..height).rev() {
                 if j % thread_num == p {
@@ -158,6 +189,7 @@ fn main() {
                             let r: Ray = cam.get_ray(u, v);
                             pixel_color.add_assign(ray_color(
                                 &r,
+                                lights_in_thread.as_ref(),
                                 background,
                                 bvh_a_in_thread.as_ref(),
                                 max_depth,
