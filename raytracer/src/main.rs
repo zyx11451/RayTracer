@@ -14,6 +14,7 @@ use hittable::HittableList;
 use image::{ImageBuffer, RgbImage};
 use indicatif::MultiProgress;
 use indicatif::ProgressBar;
+use vec3::mul_vec_dot;
 //use std::f64::consts::PI;
 use std::f64::INFINITY;
 use std::ops::AddAssign;
@@ -67,6 +68,30 @@ fn ray_color(r: &Ray, background: Color, world: &BvhNode, depth: i32) -> Color {
             .mat_ptr
             .scatter(r, &rec, &mut attenuation, &mut scattered, &mut pdf)
         {
+            let on_light = Point3 {
+                e: (
+                    random_double(213.0, 343.0),
+                    554.0,
+                    random_double(227.0, 332.0),
+                ),
+            };
+            let mut to_light = on_light - rec.p;
+            let distance_squared = to_light.length_square();
+            to_light = to_light.unit_vector();
+            if mul_vec_dot(to_light, rec.normal) < 0.0 {
+                return emitted;
+            }
+            let light_area = (343.0 - 213.0) * (332.0 - 227.0);
+            let light_cosine = to_light.e.1.abs();
+            if light_cosine < 0.000001 {
+                return emitted;
+            }
+            pdf = distance_squared / (light_cosine * light_area);
+            scattered = Ray {
+                orig: rec.p,
+                dir: to_light,
+                time: r.time,
+            };
             emitted
                 + attenuation
                     * (rec.mat_ptr.scattering_pdf(r, &rec, &mut scattered) / pdf)
@@ -80,7 +105,7 @@ fn ray_color(r: &Ray, background: Color, world: &BvhNode, depth: i32) -> Color {
 }
 fn main() {
     //
-    let path = std::path::Path::new("output/book3/image3.jpg");
+    let path = std::path::Path::new("output/book3/image4.jpg");
     let prefix = path.parent().unwrap();
     std::fs::create_dir_all(prefix).expect("Cannot create all the parents");
     //Image
@@ -88,7 +113,7 @@ fn main() {
     let width = 600;
     let height = ((width as f64) / aspect_ratio) as u32;
     let quality = 100;
-    let samples_per_pixel = 500;
+    let samples_per_pixel = 10;
     let max_depth = 50;
     let img: RgbImage = ImageBuffer::new(width, height);
     //World
