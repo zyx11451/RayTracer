@@ -146,30 +146,6 @@ impl<M: 'static + Clone + Material> Sphere<M> {
         *u = phi / (2.0 * PI);
         *v = theda / PI;
     }
-    pub fn pdf_value(&self, o: &Point3, v: &Vec3) -> f64 {
-        let k = self.hit(
-            &Ray {
-                orig: *o,
-                dir: *v,
-                time: 0.0,
-            },
-            0.001,
-            INFINITY,
-        );
-        if k.is_none() {
-            return 0.0;
-        }
-        let cos_theta_max =
-            (1.0 - self.radius * self.radius / (self.center - *o).length_square()).sqrt();
-        let solid_angle = 2.0 * PI * (1.0 - cos_theta_max);
-        1.0 / solid_angle
-    }
-    pub fn random(&self, o: &Point3) -> Vec3 {
-        let direction = self.center - *o;
-        let distance_squared = direction.length_square();
-        let uvw = Onb::build_from_w(&direction);
-        uvw.local_vec(&random_to_sphere(self.radius, distance_squared))
-    }
 }
 impl<M: 'static + Clone + Material> Hittable for Sphere<M> {
     fn hit(&self, r: &Ray, t_min: f64, t_max: f64) -> Option<HitRecord> {
@@ -211,6 +187,30 @@ impl<M: 'static + Clone + Material> Hittable for Sphere<M> {
                 },
         };
         true
+    }
+    fn pdf_value(&self, o: &Point3, v: &Vec3) -> f64 {
+        let k = self.hit(
+            &Ray {
+                orig: *o,
+                dir: *v,
+                time: 0.0,
+            },
+            0.001,
+            INFINITY,
+        );
+        if k.is_none() {
+            return 0.0;
+        }
+        let cos_theta_max =
+            (1.0 - self.radius * self.radius / (self.center - *o).length_square()).sqrt();
+        let solid_angle = 2.0 * PI * (1.0 - cos_theta_max);
+        1.0 / solid_angle
+    }
+    fn random(&self, o: &Point3) -> Vec3 {
+        let direction = self.center - *o;
+        let distance_squared = direction.length_square();
+        let uvw = Onb::build_from_w(&direction);
+        uvw.local_vec(&random_to_sphere(self.radius, distance_squared))
     }
 }
 #[derive(Clone)]
