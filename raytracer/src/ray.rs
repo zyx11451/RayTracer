@@ -8,11 +8,21 @@ pub fn write_color(tar: Color, samples_per_pixel: u32) -> image::Rgb<u8> {
     let mut r: f64 = tar.e.0;
     let mut g: f64 = tar.e.1;
     let mut b: f64 = tar.e.2;
+    if r.is_nan() {
+        r = 0.0
+    };
+    if g.is_nan() {
+        g = 0.0
+    };
+    if b.is_nan() {
+        b = 0.0
+    };
     //gamma=2.0
     let scale = 1.0 / (samples_per_pixel as f64);
     r = (scale * r).sqrt();
     g = (scale * g).sqrt();
     b = (scale * b).sqrt();
+
     //
     image::Rgb([
         (256.0 * clamp(r, 0.0, 0.999)) as u8,
