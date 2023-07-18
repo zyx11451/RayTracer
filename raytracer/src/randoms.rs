@@ -129,20 +129,17 @@ pub fn random_scene() -> HittableList {
             if (center_ - Point3 { e: (4.0, 0.2, 0.0) }).length() > 0.9 {
                 if choose_mat < 0.8 {
                     let albedo_ = random_vec(0.0, 1.0) * random_vec(0.0, 1.0);
-                    let center2 = center_
-                        + Vec3 {
-                            e: (0.0, random_double(0.0, 0.5), 0.0),
-                        };
+                    /*let center2 = center_
+                    + Vec3 {
+                        e: (0.0, random_double(0.0, 0.5), 0.0),
+                    };*/
                     let sphere_material = Lambertian {
                         albedo: SolidColor {
                             color_value: albedo_,
                         },
                     };
-                    world.add(Box::new(MovingSphere {
-                        center0: center_,
-                        center1: center2,
-                        time0: 0.0,
-                        time1: 1.0,
+                    world.add(Box::new(Sphere {
+                        center: center_,
                         radius: 0.2,
                         mat_ptr: sphere_material,
                     }));
@@ -577,13 +574,15 @@ pub fn final_scene() -> HittableList {
     )));
     //objects.add(boxes1);
     let light = DiffuseLight::new(Color { e: (7.0, 7.0, 7.0) });
-    objects.add(Box::new(XzRect {
-        x0: 123.0,
-        x1: 423.0,
-        z0: 147.0,
-        z1: 412.0,
-        k: 554.0,
-        mp: light,
+    objects.add(Box::new(FlipFace {
+        ptr: XzRect {
+            x0: 123.0,
+            x1: 423.0,
+            z0: 147.0,
+            z1: 412.0,
+            k: 554.0,
+            mp: light,
+        },
     }));
     let center1_ = Point3 {
         e: (400.0, 400.0, 200.0),

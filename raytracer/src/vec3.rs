@@ -123,12 +123,7 @@ impl Vec3 {
     }
     pub fn near_zero(&self) -> bool {
         let s = 1e-8;
-        (self.e.0 < s)
-            && (self.e.1 < s)
-            && (self.e.2 < s)
-            && (self.e.0 > -s)
-            && (self.e.1 > -s)
-            && (self.e.2 > -s)
+        (self.e.0.abs() < s) && (self.e.1.abs() < s) && (self.e.2.abs() < s)
     }
     pub fn new() -> Self {
         Self { e: (0.0, 0.0, 0.0) }

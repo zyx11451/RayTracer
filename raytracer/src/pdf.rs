@@ -28,11 +28,11 @@ impl Pdf for CosinePdf {
     }
 }
 #[derive(Clone)]
-pub struct HittablePdf<'a> {
+pub struct HittablePdf<'a, H: Hittable> {
     pub o: Point3,
-    pub ptr: &'a dyn Hittable,
+    pub ptr: &'a H,
 }
-impl<'a> Pdf for HittablePdf<'a> {
+impl<'a, H: Hittable> Pdf for HittablePdf<'a, H> {
     fn value(&self, direction: &Vec3) -> f64 {
         self.ptr.pdf_value(&self.o, direction)
     }
@@ -41,11 +41,11 @@ impl<'a> Pdf for HittablePdf<'a> {
     }
 }
 
-pub struct MixturePdf<'a> {
-    pub p1: &'a dyn Pdf,
-    pub p2: &'a dyn Pdf,
+pub struct MixturePdf<'a, P1: Pdf + ?Sized, P2: Pdf + ?Sized> {
+    pub p1: &'a P1,
+    pub p2: &'a P2,
 }
-impl<'a> Pdf for MixturePdf<'a> {
+impl<'a, P1: Pdf + ?Sized, P2: Pdf + ?Sized> Pdf for MixturePdf<'a, P1, P2> {
     fn value(&self, direction: &Vec3) -> f64 {
         0.5 * self.p1.value(direction) + 0.5 * self.p2.value(direction)
     }
