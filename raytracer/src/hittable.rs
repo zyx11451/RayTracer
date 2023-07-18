@@ -4,6 +4,7 @@ use crate::material::Dielectric;
 use crate::material::Isotropic;
 use crate::material::Material;
 use crate::randoms::random_double;
+use crate::randoms::random_int;
 use crate::randoms::random_to_sphere;
 use crate::texture::Texture;
 use crate::vec3::mul_num;
@@ -130,6 +131,18 @@ impl Hittable for HittableList {
             first_box = false;
         }
         true
+    }
+    fn pdf_value(&self, o: &Point3, v: &Vec3) -> f64 {
+        let weight = 1.0 / (self.objects.len() as f64);
+        let mut sum = 0.0;
+        for object in &self.objects {
+            sum += weight * object.pdf_value(o, v)
+        }
+        sum
+    }
+    fn random(&self, o: &Vec3) -> Vec3 {
+        let int_size = self.objects.len() as i32;
+        self.objects[random_int(0, int_size - 1) as usize].random(o)
     }
 }
 

@@ -35,7 +35,7 @@ use crate::bvh::BvhNode;
 use crate::camera::Camera;
 use crate::camera::NewCamMessage;
 use crate::hittable::Hittable;
-//use crate::hittable::Sphere;
+use crate::hittable::Sphere;
 use crate::hittable::XzRect;
 use crate::material::DiffuseLight;
 use crate::randoms::cornell_box;
@@ -117,13 +117,14 @@ fn main() {
     let width = 600;
     let height = ((width as f64) / aspect_ratio) as u32;
     let quality = 100;
-    let samples_per_pixel = 5;
+    let samples_per_pixel = 1000;
     let max_depth = 50;
     let img: RgbImage = ImageBuffer::new(width, height);
     //World
     let background = Color { e: (0.0, 0.0, 0.0) };
     let mut world: HittableList = cornell_box();
-    let lights = XzRect {
+    let mut lights = HittableList::new();
+    lights.add(Box::new(XzRect {
         x0: 213.0,
         x1: 343.0,
         z0: 227.0,
@@ -132,7 +133,26 @@ fn main() {
         mp: DiffuseLight::new(Color {
             e: (15.0, 15.0, 15.0),
         }),
-    };
+    }));
+    lights.add(Box::new(Sphere {
+        center: Point3 {
+            e: (190.0, 90.0, 190.0),
+        },
+        radius: 90.0,
+        mat_ptr: DiffuseLight::new(Color {
+            e: (15.0, 15.0, 15.0),
+        }),
+    }));
+    /*let lights = XzRect {
+        x0: 213.0,
+        x1: 343.0,
+        z0: 227.0,
+        z1: 332.0,
+        k: 554.0,
+        mp: DiffuseLight::new(Color {
+            e: (15.0, 15.0, 15.0),
+        }),
+    };*/
     /*let lights = Sphere {
         center: Point3 {
             e: (190.0, 90.0, 190.0),
