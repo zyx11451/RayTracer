@@ -15,12 +15,12 @@ use hittable::HittableList;
 use image::{ImageBuffer, RgbImage};
 use indicatif::MultiProgress;
 use indicatif::ProgressBar;
-use pdf::CosinePdf;
+//use pdf::CosinePdf;
 use pdf::HittablePdf;
 use pdf::MixturePdf;
 use pdf::Pdf;
 //use vec3::mul_vec_dot;
-use vec3::Onb;
+//use vec3::Onb;
 //use std::f64::consts::PI;
 use std::f64::INFINITY;
 use std::ops::AddAssign;
@@ -70,53 +70,33 @@ fn ray_color(
     let w = world.hit(r, 0.001, INFINITY);
     if let Some(..) = w {
         rec = w.unwrap();
-        let mut scattered: Ray = Ray {
-            orig: (Vec3::new()),
-            dir: (Vec3::new()),
-            time: 0.0,
-        };
-        let mut attenuation: Color = Color::new();
-        let mut pdf_val = 1.0;
+        let mut scattered: Ray;
         let emitted = rec.mat_ptr.emitted(r, &rec, rec.u, rec.v, &rec.p);
-        if rec
-            .mat_ptr
-            .scatter(r, &rec, &mut attenuation, &mut scattered, &mut pdf_val)
-        {
-            /*let p = CosinePdf {
-                uvw: Onb::build_from_w(&rec.normal),
+        let k = rec.mat_ptr.scatter(r, &rec);
+        if let Some(..) = k {
+            let srec = k.unwrap();
+            if srec.is_specular {
+                return srec.attenuation
+                    * ray_color(&srec.specular_ray, lights, background, world, depth - 1);
+            }
+            let p2_ = srec.pdf_ptr.unwrap();
+            let p = {
+                MixturePdf {
+                    p1: &HittablePdf {
+                        o: rec.p,
+                        ptr: lights,
+                    },
+                    p2: p2_.as_ref(),
+                }
             };
             scattered = Ray {
                 orig: rec.p,
                 dir: p.generate(),
                 time: r.time,
             };
-            pdf_val = p.value(&scattered.dir);*/
-            /*let p = HittablePdf {
-                o: rec.p,
-                ptr: lights,
-            };
-            scattered = Ray {
-                orig: rec.p,
-                dir: p.generate(),
-                time: r.time,
-            };
-            pdf_val = p.value(&scattered.dir);*/
-            let p1_ = HittablePdf {
-                o: rec.p,
-                ptr: lights,
-            };
-            let p2_ = CosinePdf {
-                uvw: Onb::build_from_w(&rec.normal),
-            };
-            let p = MixturePdf { p1: p1_, p2: p2_ };
-            scattered = Ray {
-                orig: rec.p,
-                dir: p.generate(),
-                time: r.time,
-            };
-            pdf_val = p.value(&scattered.dir);
+            let pdf_val = p.value(&scattered.dir);
             emitted
-                + attenuation
+                + srec.attenuation
                     * (rec.mat_ptr.scattering_pdf(r, &rec, &mut scattered) / pdf_val)
                     * ray_color(&scattered, lights, background, world, depth - 1)
         } else {
@@ -128,7 +108,7 @@ fn ray_color(
 }
 fn main() {
     //
-    let path = std::path::Path::new("output/book3/image8.jpg");
+    let path = std::path::Path::new("output/book3/test.jpg");
     let prefix = path.parent().unwrap();
     std::fs::create_dir_all(prefix).expect("Cannot create all the parents");
     //Image

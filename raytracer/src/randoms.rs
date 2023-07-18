@@ -373,12 +373,18 @@ pub fn cornell_box() -> HittableList {
         k: 555.0,
         mp: white.clone(),
     }));
+    let aluminum = Metal {
+        albedo: Color {
+            e: (0.8, 0.85, 0.88),
+        },
+        fuzz: 0.0,
+    };
     let box1 = MyBox::new(
         &Point3 { e: (0.0, 0.0, 0.0) },
         &Point3 {
             e: (165.0, 330.0, 165.0),
         },
-        white.clone(),
+        aluminum,
     );
     let box1 = RotateY::new(box1, 15.0);
     let box1 = Box::new(Translate {

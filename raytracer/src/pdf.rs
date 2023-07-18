@@ -10,6 +10,7 @@ pub trait Pdf {
     fn value(&self, direction: &Vec3) -> f64;
     fn generate(&self) -> Vec3;
 }
+#[derive(Clone)]
 pub struct CosinePdf {
     pub uvw: Onb,
 }
@@ -26,6 +27,7 @@ impl Pdf for CosinePdf {
         self.uvw.local_vec(&random_cosine_direction())
     }
 }
+#[derive(Clone)]
 pub struct HittablePdf<'a> {
     pub o: Point3,
     pub ptr: &'a dyn Hittable,
@@ -39,11 +41,11 @@ impl<'a> Pdf for HittablePdf<'a> {
     }
 }
 
-pub struct MixturePdf<P1: Pdf, P2: Pdf> {
-    pub p1: P1,
-    pub p2: P2,
+pub struct MixturePdf<'a> {
+    pub p1: &'a dyn Pdf,
+    pub p2: &'a dyn Pdf,
 }
-impl<P1: Pdf, P2: Pdf> Pdf for MixturePdf<P1, P2> {
+impl<'a> Pdf for MixturePdf<'a> {
     fn value(&self, direction: &Vec3) -> f64 {
         0.5 * self.p1.value(direction) + 0.5 * self.p2.value(direction)
     }

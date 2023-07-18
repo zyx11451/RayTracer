@@ -1,21 +1,21 @@
 use std::f64::consts::PI;
 
-use crate::randoms::{min, random_cosine_direction, random_double, random_in_unit_sphere};
+use crate::pdf::{CosinePdf, Pdf};
+use crate::randoms::{min, random_double, random_in_unit_sphere};
 use crate::texture::{SolidColor, Texture};
 use crate::vec3::{mul_vec_dot, reflect, refract, Color, Onb, Point3, Vec3};
 
 use crate::{hittable::HitRecord, ray::Ray};
 
+pub struct ScatterRecord {
+    pub specular_ray: Ray,
+    pub is_specular: bool,
+    pub attenuation: Color,
+    pub pdf_ptr: Option<Box<dyn Pdf>>,
+}
 pub trait Material {
-    fn scatter(
-        &self,
-        _r_in: &Ray,
-        _rec: &HitRecord,
-        _attenuation: &mut Color,
-        _scattered: &mut Ray,
-        _pdf: &mut f64,
-    ) -> bool {
-        false
+    fn scatter(&self, _r_in: &Ray, _rec: &HitRecord) -> Option<ScatterRecord> {
+        None
     }
     fn scattering_pdf(&self, _r_in: &Ray, _rec: &HitRecord, _scattered: &mut Ray) -> f64 {
         1.0
@@ -29,36 +29,19 @@ pub struct Lambertian<T: Texture> {
     pub albedo: T,
 }
 impl<T: Texture> Material for Lambertian<T> {
-    fn scatter(
-        &self,
-        r_in: &Ray,
-        rec: &HitRecord,
-        attenuation: &mut Color,
-        scattered: &mut Ray,
-        pdf: &mut f64,
-    ) -> bool {
-        /*let mut scatter_direction = rec.normal + random_unit_vec();
-        if scatter_direction.near_zero() {
-            scatter_direction = rec.normal;
-        }
-        *scattered = Ray {
-            orig: (rec.p),
-            dir: (scatter_direction),
-            time: r_in.time,
-        };
-        *attenuation = self.albedo.value(rec.u, rec.v, &rec.p);
-        *pdf=mul_vec_dot(rec.normal, scattered.dir.unit_vector())/PI;
-        true*/
-        let uvw = Onb::build_from_w(&rec.normal);
-        let direction = uvw.local_vec(&random_cosine_direction());
-        *scattered = Ray {
-            orig: (rec.p),
-            dir: (direction),
-            time: r_in.time,
-        };
-        *attenuation = self.albedo.value(rec.u, rec.v, &rec.p);
-        *pdf = mul_vec_dot(uvw.axis_z, scattered.dir) / PI;
-        true
+    fn scatter(&self, _r_in: &Ray, rec: &HitRecord) -> Option<ScatterRecord> {
+        Some(ScatterRecord {
+            specular_ray: Ray {
+                orig: Vec3::new(),
+                dir: Vec3::new(),
+                time: 0.0,
+            },
+            is_specular: false,
+            attenuation: self.albedo.value(rec.u, rec.v, &rec.p),
+            pdf_ptr: Some(Box::new(CosinePdf {
+                uvw: Onb::build_from_w(&rec.normal),
+            })),
+        })
     }
     fn scattering_pdf(&self, _r_in: &Ray, rec: &HitRecord, scattered: &mut Ray) -> f64 {
         let cosine = mul_vec_dot(rec.normal, scattered.dir.unit_vector());
@@ -75,22 +58,19 @@ pub struct Metal {
     pub fuzz: f64,
 }
 impl Material for Metal {
-    fn scatter(
-        &self,
-        r_in: &Ray,
-        rec: &HitRecord,
-        attenuation: &mut Color,
-        scattered: &mut Ray,
-        _pdf: &mut f64,
-    ) -> bool {
+    fn scatter(&self, r_in: &Ray, rec: &HitRecord) -> Option<ScatterRecord> {
         let reflected: Vec3 = reflect(r_in.dir.unit_vector(), rec.normal);
-        *scattered = Ray {
-            orig: (rec.p),
-            dir: (reflected + random_in_unit_sphere() * self.fuzz),
-            time: r_in.time,
-        };
-        *attenuation = self.albedo;
-        mul_vec_dot(scattered.dir, rec.normal) > 0.0
+
+        Some(ScatterRecord {
+            specular_ray: Ray {
+                orig: (rec.p),
+                dir: (reflected + random_in_unit_sphere() * self.fuzz),
+                time: r_in.time,
+            },
+            is_specular: true,
+            attenuation: self.albedo,
+            pdf_ptr: None,
+        })
     }
 }
 #[derive(Clone)]
@@ -103,15 +83,7 @@ pub fn reflectance(cosine: f64, ref_idx: f64) -> f64 {
     r0 * r0 + (1.0 - r0 * r0) * ((1.0 - cosine).powf(5.0))
 }
 impl Material for Dielectric {
-    fn scatter(
-        &self,
-        r_in: &Ray,
-        rec: &HitRecord,
-        attenuation: &mut Color,
-        scattered: &mut Ray,
-        _pdf: &mut f64,
-    ) -> bool {
-        *attenuation = Color { e: (1.0, 1.0, 1.0) };
+    fn scatter(&self, r_in: &Ray, rec: &HitRecord) -> Option<ScatterRecord> {
         let reflection_ratio = if rec.front_face {
             1.0 / self.ir
         } else {
@@ -128,12 +100,16 @@ impl Material for Dielectric {
         } else {
             refract(unit_direction, rec.normal, reflection_ratio)
         };
-        *scattered = Ray {
-            orig: rec.p,
-            dir: direction,
-            time: r_in.time,
-        };
-        true
+        Some(ScatterRecord {
+            specular_ray: Ray {
+                orig: rec.p,
+                dir: direction,
+                time: r_in.time,
+            },
+            is_specular: true,
+            attenuation: Color { e: (1.0, 1.0, 1.0) },
+            pdf_ptr: None,
+        })
     }
 }
 #[derive(Clone)]
@@ -148,15 +124,8 @@ impl DiffuseLight<SolidColor> {
     }
 }
 impl<T: Texture> Material for DiffuseLight<T> {
-    fn scatter(
-        &self,
-        _r_in: &Ray,
-        _rec: &HitRecord,
-        _attenuation: &mut Color,
-        _scattered: &mut Ray,
-        _pdf: &mut f64,
-    ) -> bool {
-        false
+    fn scatter(&self, _r_in: &Ray, _rec: &HitRecord) -> Option<ScatterRecord> {
+        None
     }
     fn emitted(&self, _r_in: &Ray, rec: &HitRecord, u: f64, v: f64, p: &Point3) -> Color {
         if rec.front_face {
@@ -178,20 +147,16 @@ impl Isotropic<SolidColor> {
     }
 }
 impl<T: Texture> Material for Isotropic<T> {
-    fn scatter(
-        &self,
-        r_in: &Ray,
-        rec: &HitRecord,
-        attenuation: &mut Color,
-        scattered: &mut Ray,
-        _pdf: &mut f64,
-    ) -> bool {
-        *scattered = Ray {
-            orig: rec.p,
-            dir: random_in_unit_sphere(),
-            time: r_in.time,
-        };
-        *attenuation = self.albedo.value(rec.u, rec.v, &rec.p);
-        true
+    fn scatter(&self, r_in: &Ray, rec: &HitRecord) -> Option<ScatterRecord> {
+        Some(ScatterRecord {
+            specular_ray: Ray {
+                orig: rec.p,
+                dir: random_in_unit_sphere(),
+                time: r_in.time,
+            },
+            is_specular: true,
+            attenuation: self.albedo.value(rec.u, rec.v, &rec.p),
+            pdf_ptr: None,
+        })
     }
 }
