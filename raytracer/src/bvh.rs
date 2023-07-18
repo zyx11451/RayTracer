@@ -62,7 +62,6 @@ impl BvhNode {
     ) -> Self {
         let left_: Option<Box<dyn Hittable>>;
         let right_: Option<Box<dyn Hittable>>;
-
         let objects = src_objects;
         let axis = random_int(0, 2);
         let comparator = if axis == 0 {

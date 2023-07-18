@@ -35,6 +35,7 @@ use crate::bvh::BvhNode;
 use crate::camera::Camera;
 use crate::camera::NewCamMessage;
 use crate::hittable::Hittable;
+//use crate::hittable::Sphere;
 use crate::hittable::XzRect;
 use crate::material::DiffuseLight;
 use crate::randoms::cornell_box;
@@ -116,7 +117,7 @@ fn main() {
     let width = 600;
     let height = ((width as f64) / aspect_ratio) as u32;
     let quality = 100;
-    let samples_per_pixel = 1000;
+    let samples_per_pixel = 5;
     let max_depth = 50;
     let img: RgbImage = ImageBuffer::new(width, height);
     //World
@@ -132,6 +133,15 @@ fn main() {
             e: (15.0, 15.0, 15.0),
         }),
     };
+    /*let lights = Sphere {
+        center: Point3 {
+            e: (190.0, 90.0, 190.0),
+        },
+        radius: 90.0,
+        mat_ptr: DiffuseLight::new(Color {
+            e: (15.0, 15.0, 15.0),
+        }),
+    };*/
     let end = world.objects.len() as u32;
     let bvh = BvhNode::new_nodes(&mut world.objects, 0, end, 0.0, 1.0);
     //Camera

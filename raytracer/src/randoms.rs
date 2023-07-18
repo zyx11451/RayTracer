@@ -93,6 +93,15 @@ pub fn random_cosine_direction() -> Vec3 {
     let y = phi.sin() * r2.sqrt();
     Vec3 { e: (x, y, z) }
 }
+pub fn random_to_sphere(radius: f64, distance_squared: f64) -> Vec3 {
+    let r1 = random_double(0.0, 1.0);
+    let r2 = random_double(0.0, 1.0);
+    let z = 1.0 + r2 * ((1.0 - radius * radius / distance_squared).sqrt() - 1.0);
+    let phi = 2.0 * PI * r1;
+    let x = phi.cos() * (1.0 - z * z).sqrt();
+    let y = phi.sin() * (1.0 - z * z).sqrt();
+    Vec3 { e: (x, y, z) }
+}
 pub fn random_scene() -> HittableList {
     let mut world = HittableList::new();
     let checker = CheckerTexture {
@@ -322,6 +331,7 @@ pub fn cornell_box() -> HittableList {
     let light = DiffuseLight::new(Color {
         e: (15.0, 15.0, 15.0),
     });
+    let glass = Dielectric { ir: 1.5 };
     objects.add(Box::new(YzRect {
         y0: 0.0,
         y1: 555.0,
@@ -373,18 +383,18 @@ pub fn cornell_box() -> HittableList {
         k: 555.0,
         mp: white.clone(),
     }));
-    let aluminum = Metal {
+    /*let aluminum = Metal {
         albedo: Color {
             e: (0.8, 0.85, 0.88),
         },
         fuzz: 0.0,
-    };
+    };*/
     let box1 = MyBox::new(
         &Point3 { e: (0.0, 0.0, 0.0) },
         &Point3 {
             e: (165.0, 330.0, 165.0),
         },
-        aluminum,
+        white,
     );
     let box1 = RotateY::new(box1, 15.0);
     let box1 = Box::new(Translate {
@@ -395,7 +405,7 @@ pub fn cornell_box() -> HittableList {
     });
 
     objects.add(box1);
-    let box2 = MyBox::new(
+    /*let box2 = MyBox::new(
         &Point3 { e: (0.0, 0.0, 0.0) },
         &Point3 {
             e: (165.0, 165.0, 165.0),
@@ -409,7 +419,14 @@ pub fn cornell_box() -> HittableList {
         },
         ptr: box2,
     });
-    objects.add(box2);
+    objects.add(box2);*/
+    objects.add(Box::new(Sphere {
+        center: Point3 {
+            e: (190.0, 90.0, 190.0),
+        },
+        radius: 90.0,
+        mat_ptr: glass,
+    }));
     objects
 }
 pub fn cornell_box_smoke() -> HittableList {

@@ -4,8 +4,10 @@ use crate::material::Dielectric;
 use crate::material::Isotropic;
 use crate::material::Material;
 use crate::randoms::random_double;
+use crate::randoms::random_to_sphere;
 use crate::texture::Texture;
 use crate::vec3::mul_num;
+use crate::vec3::Onb;
 
 use super::ray::Ray;
 use super::vec3::mul_vec_dot;
@@ -137,12 +139,36 @@ pub struct Sphere<M: Clone + Material> {
     pub radius: f64,
     pub mat_ptr: M,
 }
-impl<M: Clone + Material> Sphere<M> {
+impl<M: 'static + Clone + Material> Sphere<M> {
     pub fn get_sphere_uv(&self, p: &Point3, u: &mut f64, v: &mut f64) {
         let theda = (-p.e.1).acos();
         let phi = (-p.e.2).atan2(p.e.0) + PI;
         *u = phi / (2.0 * PI);
         *v = theda / PI;
+    }
+    pub fn pdf_value(&self, o: &Point3, v: &Vec3) -> f64 {
+        let k = self.hit(
+            &Ray {
+                orig: *o,
+                dir: *v,
+                time: 0.0,
+            },
+            0.001,
+            INFINITY,
+        );
+        if k.is_none() {
+            return 0.0;
+        }
+        let cos_theta_max =
+            (1.0 - self.radius * self.radius / (self.center - *o).length_square()).sqrt();
+        let solid_angle = 2.0 * PI * (1.0 - cos_theta_max);
+        1.0 / solid_angle
+    }
+    pub fn random(&self, o: &Point3) -> Vec3 {
+        let direction = self.center - *o;
+        let distance_squared = direction.length_square();
+        let uvw = Onb::build_from_w(&direction);
+        uvw.local_vec(&random_to_sphere(self.radius, distance_squared))
     }
 }
 impl<M: 'static + Clone + Material> Hittable for Sphere<M> {
