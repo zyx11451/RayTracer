@@ -2,7 +2,7 @@ use std::cmp::Ordering;
 
 use crate::{
     aabb::{surrounding_box, AABB},
-    hittable::{HitRecord, Hittable},
+    hittable::hittable::{HitRecord, Hittable},
     randoms::random_int,
     ray::Ray,
     vec3::Vec3,

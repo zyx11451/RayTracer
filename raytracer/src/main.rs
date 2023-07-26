@@ -9,9 +9,11 @@ pub mod randoms;
 pub mod ray;
 pub mod texture;
 pub mod vec3;
+pub mod loadobj;
+pub mod scene;
 use console::style;
-use hittable::HitRecord;
-use hittable::HittableList;
+use hittable::hittable::HitRecord;
+use hittable::hittable::HittableList;
 use image::Rgb;
 use image::{ImageBuffer, RgbImage};
 use indicatif::MultiProgress;
@@ -29,14 +31,15 @@ use std::{fs::File, process::exit};
 use crate::bvh::BvhNode;
 use crate::camera::Camera;
 use crate::camera::NewCamMessage;
-use crate::hittable::Hittable;
-use crate::hittable::Sphere;
-use crate::hittable::XzRect;
-use crate::material::DiffuseLight;
-use crate::randoms::cornell_box;
+use crate::hittable::hittable::Hittable;
+use crate::hittable::sphere::Sphere;
+use crate::hittable::rect::XzRect;
+use crate::material::diffuselight::DiffuseLight;
+use crate::scene::cornellbox::cornell_box;
+use crate::scene::myworld::my_world;
 //use crate::randoms::final_scene;
 use crate::randoms::random_double;
-use crate::randoms::random_scene;
+use crate::scene::randomscene::random_scene;
 use crate::ray::write_color;
 use crate::ray::Ray;
 use crate::vec3::Color;
@@ -69,11 +72,12 @@ fn ray_color(
             let p2_ = srec.pdf_ptr.unwrap();
             let p = {
                 MixturePdf {
-                    p1: &HittablePdf {
+                    //切换的时候要改一下
+                    /*p1: &HittablePdf {
                         o: rec.p,
                         ptr: lights,
-                    },
-                    //p1: p2_.as_ref(),
+                    },*/
+                    p1:p2_.as_ref(),
                     p2: p2_.as_ref(),
                 }
             };
@@ -85,8 +89,8 @@ fn ray_color(
             let pdf_val = p.value(&scattered.dir);
             emitted
                 + srec.attenuation
-                    * (rec.mat_ptr.scattering_pdf(r, &rec, &mut scattered) / pdf_val)
-                    * ray_color(&scattered, lights, background, world, depth - 1)
+                    * (rec.mat_ptr.scattering_pdf(r, &rec, &mut scattered))
+                    * (ray_color(&scattered, lights, background, world, depth - 1) / pdf_val)
         } else {
             emitted
         }
@@ -104,18 +108,18 @@ fn main() {
     //
     let test_cornell_box = true;
     if test_cornell_box {
-        let path = std::path::Path::new("output/book3/test_c_box.jpg");
+        let path = std::path::Path::new("output/book3/work.jpg");
         let prefix = path.parent().unwrap();
         std::fs::create_dir_all(prefix).expect("Cannot create all the parents");
         let aspect_ratio: f64 = 1.0;
         let width = 600;
         let height = ((width as f64) / aspect_ratio) as u32;
         let quality = 100;
-        let samples_per_pixel = 1000;
+        let samples_per_pixel = 10;//1000
         let max_depth = 50;
         let img: RgbImage = ImageBuffer::new(width, height);
-        let background = Color { e: (0.0, 0.0, 0.0) };
-        let mut world: HittableList = cornell_box();
+        let background = Color { e: (153.0/256.0, 204.0/256.0, 1.0) };
+        let mut world: HittableList = my_world();
         let mut lights = HittableList::new();
         lights.add(Box::new(XzRect {
             x0: 213.0,
@@ -139,10 +143,10 @@ fn main() {
         let end = world.objects.len() as u32;
         let bvh = BvhNode::new_nodes(&mut world.objects, 0, end, 0.0, 1.0);
         let lookfrom: Point3 = Point3 {
-            e: (278.0, 278.0, -800.0),
+            e:(400.0, 400.0, -800.0),//(900.0, 900.0, -800.0),//(400.0, 400.0, -800.0)
         };
         let lookat: Point3 = Point3 {
-            e: (278.0, 278.0, 0.0),
+            e: (0.0, 0.0, 0.0),
         };
         let cam = Camera::new_cam(
             lookfrom,

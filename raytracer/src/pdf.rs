@@ -1,14 +1,31 @@
 use std::f64::consts::PI;
 
 use crate::{
-    hittable::Hittable,
-    randoms::{random_cosine_direction, random_double},
+    hittable::hittable::Hittable,
+    randoms::{random_cosine_direction, random_double, random_in_semi_sphere},
     vec3::{mul_vec_dot, Onb, Point3, Vec3},
 };
 
 pub trait Pdf {
     fn value(&self, direction: &Vec3) -> f64;
     fn generate(&self) -> Vec3;
+}
+#[derive(Clone)]
+pub struct TestPdf {
+    pub uvw: Onb,
+}
+impl Pdf for TestPdf {
+    fn value(&self, direction: &Vec3) -> f64 {
+        let cosine = mul_vec_dot(direction.unit_vector(), self.uvw.axis_z);
+        if cosine <= 0.0 {
+            0.0
+        } else {
+            1.0 /(2.0* PI)
+        }
+    }
+    fn generate(&self) -> Vec3 {
+        self.uvw.local_vec(&random_in_semi_sphere(Vec3 { e: (0.0,0.0,1.0) }))
+    }
 }
 #[derive(Clone)]
 pub struct CosinePdf {
