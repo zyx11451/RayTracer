@@ -3,7 +3,7 @@ use crate::material::isotropic::Isotropic;
 use crate::material::material::Material;
 use crate::random_double;
 use crate::ray::Ray;
-use crate::texture::Texture;
+use crate::texture::texture::Texture;
 use crate::vec3::Vec3;
 use crate::HitRecord;
 use crate::Hittable;

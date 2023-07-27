@@ -1,20 +1,23 @@
+use crate::camera::{Camera, NewCamMessage};
 //这是book2的最后一张图
+use crate::randoms::{random_double, random_vec};
 use crate::{
     bvh::BvhNode,
     hittable::movingsphere::MovingSphere,
     hittable::sphere::Sphere,
     hittable::{
-        constantmedium::ConstantMedium, mybox::MyBox,  rect::XzRect, 
-        rotate::RotateY, translate::Translate,
+        constantmedium::ConstantMedium, mybox::MyBox, rect::XzRect, rotate::RotateY,
+        translate::Translate,
     },
     hittable::{flipface::FlipFace, hittable::HittableList},
-    material::{dielectric::Dielectric, diffuselight::DiffuseLight, lambertian::Lambertian, metal::Metal},
+    material::{
+        dielectric::Dielectric, diffuselight::DiffuseLight, lambertian::Lambertian, metal::Metal,
+    },
     perlin::Perlin,
-    texture::{ ImageTexture, NoiseTexture, SolidColor},
-    vec3::{ Color, Point3, Vec3},
+    texture::{imagetexture::ImageTexture, noisetexture::NoiseTexture, solodcolor::SolidColor},
+    vec3::{Color, Point3, Vec3},
 };
-use crate::randoms::{random_double,random_vec};
-pub fn final_scene() -> HittableList {
+pub fn final_scene() -> (Color, f64, u32, HittableList, Camera) {
     let mut boxes1 = HittableList::new();
     let ground = Lambertian {
         albedo: SolidColor::new(Color {
@@ -175,5 +178,28 @@ pub fn final_scene() -> HittableList {
             15.0,
         ),
     }));
-    objects
+    let lookfrom: Point3 = Point3 {
+        e: (478.0, 278.0, -600.0),
+    };
+    let lookat: Point3 = Point3 { e: (278.0, 278.0, 0.0) };
+    let aspect_ratio: f64 = 1.0;
+    (
+        Color { e: (0.0, 0.0, 0.0) },
+        1.0,
+        600,
+        objects,
+        Camera::new_cam(
+            lookfrom,
+            lookat,
+            Vec3 { e: (0.0, 1.0, 0.0) },
+            NewCamMessage {
+                vfov: 40.0,
+                _aspect_ratio: aspect_ratio,
+                aperture: 0.0,
+                focus_dist: 10.0,
+                _time0: 0.0,
+                _time1: 1.0,
+            },
+        ),
+    )
 }

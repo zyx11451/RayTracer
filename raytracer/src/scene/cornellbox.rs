@@ -5,10 +5,10 @@ use crate::{
     },
     hittable::{sphere::Sphere,flipface::FlipFace, hittable::HittableList},
     material::{dielectric::Dielectric, diffuselight::DiffuseLight, lambertian::Lambertian},
-    texture::SolidColor,
-    vec3::{ Color, Point3, Vec3},
+    texture::solodcolor::SolidColor,
+    vec3::{ Color, Point3, Vec3}, camera::{Camera, NewCamMessage},
 };
-pub fn cornell_box() -> HittableList {
+pub fn cornell_box() -> (Color,f64, u32, HittableList, Camera) {
     let mut objects = HittableList::new();
     let red = Lambertian {
         albedo: SolidColor {
@@ -130,5 +130,28 @@ pub fn cornell_box() -> HittableList {
         radius: 90.0,
         mat_ptr: glass,
     }));
-    objects
+    let lookfrom: Point3 = Point3 {
+        e: (278.0, 278.0, -800.0),
+    };
+    let lookat: Point3 = Point3 { e: (278.0, 278.0, 0.0) };
+    let aspect_ratio: f64 = 1.0;
+    (
+        Color { e: (0.0, 0.0, 0.0) },
+        1.0,
+        600,
+        objects,
+        Camera::new_cam(
+            lookfrom,
+            lookat,
+            Vec3 { e: (0.0, 1.0, 0.0) },
+            NewCamMessage {
+                vfov: 40.0,
+                _aspect_ratio: aspect_ratio,
+                aperture: 0.0,
+                focus_dist: 10.0,
+                _time0: 0.0,
+                _time1: 1.0,
+            },
+        ),
+    )
 }

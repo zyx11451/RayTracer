@@ -2,15 +2,15 @@ pub mod aabb;
 pub mod bvh;
 pub mod camera;
 pub mod hittable;
+pub mod loadobj;
 pub mod material;
 pub mod pdf;
 pub mod perlin;
 pub mod randoms;
 pub mod ray;
+pub mod scene;
 pub mod texture;
 pub mod vec3;
-pub mod loadobj;
-pub mod scene;
 use console::style;
 use hittable::hittable::HitRecord;
 use hittable::hittable::HittableList;
@@ -18,7 +18,7 @@ use image::Rgb;
 use image::{ImageBuffer, RgbImage};
 use indicatif::MultiProgress;
 use indicatif::ProgressBar;
-use pdf::HittablePdf;
+//use pdf::HittablePdf;
 use pdf::MixturePdf;
 use pdf::Pdf;
 use std::f64::INFINITY;
@@ -32,16 +32,23 @@ use crate::bvh::BvhNode;
 use crate::camera::Camera;
 use crate::camera::NewCamMessage;
 use crate::hittable::hittable::Hittable;
-use crate::hittable::sphere::Sphere;
-use crate::hittable::rect::XzRect;
-use crate::material::diffuselight::DiffuseLight;
 use crate::scene::cornellbox::cornell_box;
+use crate::scene::cornellboxsmoke::cornell_box_smoke;
+use crate::scene::earth::earth;
+use crate::scene::finalscene::final_scene;
+//use crate::hittable::rect::XzRect;
+//use crate::hittable::sphere::Sphere;
+//use crate::material::diffuselight::DiffuseLight;
+//use crate::scene::cornellbox::cornell_box;
 use crate::scene::myworld::my_world;
 //use crate::randoms::final_scene;
 use crate::randoms::random_double;
-use crate::scene::randomscene::random_scene;
 use crate::ray::write_color;
 use crate::ray::Ray;
+use crate::scene::randomscene::random_scene;
+use crate::scene::simplelight::simple_light;
+use crate::scene::twoperlinsphere::two_perlin_sphere;
+use crate::scene::twosphere::two_spheres;
 use crate::vec3::Color;
 use crate::vec3::Point3;
 use crate::vec3::Vec3;
@@ -77,7 +84,7 @@ fn ray_color(
                         o: rec.p,
                         ptr: lights,
                     },*/
-                    p1:p2_.as_ref(),
+                    p1: p2_.as_ref(),
                     p2: p2_.as_ref(),
                 }
             };
@@ -111,56 +118,15 @@ fn main() {
         let path = std::path::Path::new("output/book3/work.jpg");
         let prefix = path.parent().unwrap();
         std::fs::create_dir_all(prefix).expect("Cannot create all the parents");
-        let aspect_ratio: f64 = 1.0;
-        let width = 600;
-        let height = ((width as f64) / aspect_ratio) as u32;
         let quality = 100;
-        let samples_per_pixel = 10;//1000
+        let samples_per_pixel = 100; //1000
         let max_depth = 50;
+        let (background,aspect_ratio,width, mut world, cam) = random_scene();
+        let height = ((width as f64) / aspect_ratio) as u32;
+        let lights = HittableList::new();
         let img: RgbImage = ImageBuffer::new(width, height);
-        let background = Color { e: (153.0/256.0, 204.0/256.0, 1.0) };
-        let mut world: HittableList = my_world();
-        let mut lights = HittableList::new();
-        lights.add(Box::new(XzRect {
-            x0: 213.0,
-            x1: 343.0,
-            z0: 227.0,
-            z1: 332.0,
-            k: 554.0,
-            mp: DiffuseLight::new(Color {
-                e: (15.0, 15.0, 15.0),
-            }),
-        }));
-        lights.add(Box::new(Sphere {
-            center: Point3 {
-                e: (190.0, 90.0, 190.0),
-            },
-            radius: 90.0,
-            mat_ptr: DiffuseLight::new(Color {
-                e: (15.0, 15.0, 15.0),
-            }),
-        }));
         let end = world.objects.len() as u32;
         let bvh = BvhNode::new_nodes(&mut world.objects, 0, end, 0.0, 1.0);
-        let lookfrom: Point3 = Point3 {
-            e:(400.0, 400.0, -800.0),//(900.0, 900.0, -800.0),//(400.0, 400.0, -800.0)
-        };
-        let lookat: Point3 = Point3 {
-            e: (0.0, 0.0, 0.0),
-        };
-        let cam = Camera::new_cam(
-            lookfrom,
-            lookat,
-            Vec3 { e: (0.0, 1.0, 0.0) },
-            NewCamMessage {
-                vfov: 40.0,
-                _aspect_ratio: aspect_ratio,
-                aperture: 0.0,
-                focus_dist: 10.0,
-                _time0: 0.0,
-                _time1: 1.0,
-            },
-        );
         let thread_num = 20; //必须是图像高度的因数
         let main_progress = Arc::new(Mutex::new(MultiProgress::new()));
         let bvh_a = Arc::new(bvh);
@@ -232,39 +198,18 @@ fn main() {
     std::fs::create_dir_all(prefix).expect("Cannot create all the parents");
     //Image
     //random_scene_进行边缘检测的测试
-    let aspect_ratio: f64 = 3.0 / 2.0;
-    let width = 1200;
-    let height = ((width as f64) / aspect_ratio) as u32;
     let quality = 100;
     let samples_per_pixel = 100;
     let max_depth = 50;
-    let img: RgbImage = ImageBuffer::new(width, height);
+    
 
     //World
-    let background = Color { e: (0.5, 0.7, 1.0) };
-    let mut world: HittableList = random_scene();
+    let (background,aspect_ratio,width, mut world, cam)= random_scene();
+    let height = ((width as f64) / aspect_ratio) as u32;
+    let img: RgbImage = ImageBuffer::new(width, height);
     let lights = HittableList::new();
     let end = world.objects.len() as u32;
     let bvh = BvhNode::new_nodes(&mut world.objects, 0, end, 0.0, 1.0);
-    //Camera
-    //random_scene
-    let lookfrom: Point3 = Point3 {
-        e: (13.0, 2.0, 3.0),
-    };
-    let lookat: Point3 = Point3 { e: (0.0, 0.0, 0.0) };
-    let cam = Camera::new_cam(
-        lookfrom,
-        lookat,
-        Vec3 { e: (0.0, 1.0, 0.0) },
-        NewCamMessage {
-            vfov: 20.0,
-            _aspect_ratio: aspect_ratio,
-            aperture: 0.0,
-            focus_dist: 10.0,
-            _time0: 0.0,
-            _time1: 1.0,
-        },
-    );
     //Render
     let thread_num = 20; //必须是图像高度的因数
     let main_progress = Arc::new(Mutex::new(MultiProgress::new()));
