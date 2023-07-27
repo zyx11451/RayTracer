@@ -15,7 +15,7 @@ fn pixel_gray_value(rgb: &Rgb<u8>) -> i32 {
     (gray_value(rgb.0[0], rgb.0[1], rgb.0[2])) as i32
 }
 pub fn edgedetect(source: &str, output: &str, thread_num: u32) {
-    let source = format!("{}", source); //依需求调整
+    let source = format!("output/{}", source); //依需求调整
     let source_path = Path::new(&source);
     let img_: DynamicImage = image::open(source_path).expect("failed");
     let rgb_img: RgbImage = match img_ {

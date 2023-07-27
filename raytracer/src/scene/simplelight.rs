@@ -1,11 +1,12 @@
 use crate::{
-    hittable::sphere::Sphere,
+    camera::{Camera, NewCamMessage},
     hittable::rect::XyRect,
-    hittable:: hittable::HittableList,
-    material::{ diffuselight::DiffuseLight, lambertian::Lambertian},
+    hittable::sphere::Sphere,
+    hittable::HittableList,
+    material::{diffuselight::DiffuseLight, lambertian::Lambertian},
     perlin::Perlin,
-    texture:: noisetexture::NoiseTexture,
-    vec3::{ Color, Point3, Vec3}, camera::{Camera, NewCamMessage},
+    texture::noisetexture::NoiseTexture,
+    vec3::{Color, Point3, Vec3},
 };
 pub fn simple_light() -> (Color, f64, u32, HittableList, Camera) {
     let mut objects = HittableList::new();
@@ -48,11 +49,9 @@ pub fn simple_light() -> (Color, f64, u32, HittableList, Camera) {
         e: (26.0, 3.0, 6.0),
     };
     let lookat: Point3 = Point3 { e: (0.0, 2.0, 0.0) };
-    let aspect_ratio: f64 = 16.0/9.0;
+    let aspect_ratio: f64 = 16.0 / 9.0;
     (
-        Color{
-            e: (0.0, 0.0 , 0.0),
-        },
+        Color { e: (0.0, 0.0, 0.0) },
         aspect_ratio,
         1600,
         objects,

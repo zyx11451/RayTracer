@@ -2,11 +2,11 @@ use std::path::Path;
 
 use image::{DynamicImage, RgbImage};
 
+use crate::texture::Texture;
 use crate::{
     randoms::clamp,
     vec3::{Color, Point3},
 };
-use crate::texture::Texture;
 #[derive(Clone)]
 pub struct ImageTexture {
     pub img: RgbImage,

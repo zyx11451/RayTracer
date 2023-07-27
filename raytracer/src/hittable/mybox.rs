@@ -2,7 +2,7 @@ use super::rect::XyRect;
 use super::rect::XzRect;
 use super::rect::YzRect;
 use crate::aabb::AABB;
-use crate::material::material::Material;
+use crate::material::Material;
 use crate::ray::Ray;
 use crate::vec3::Point3;
 use crate::HitRecord;

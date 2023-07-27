@@ -1,11 +1,11 @@
 use crate::{
     camera::{Camera, NewCamMessage},
-    hittable::hittable::HittableList,
+    hittable::HittableList,
     hittable::{rotate::RotateY, translate::Translate},
     loadobj::obj_mtl_load,
-    vec3::{Point3, Vec3, Color},
+    vec3::{Color, Point3, Vec3},
 };
-pub fn my_world() -> (Color,f64, u32, HittableList, Camera) {
+pub fn my_world() -> (Color, f64, u32, HittableList, Camera) {
     let mut objects = HittableList::new();
     let battery: String = "1".to_string();
     objects.add(Box::new(RotateY::new(
@@ -23,7 +23,7 @@ pub fn my_world() -> (Color,f64, u32, HittableList, Camera) {
     let lookat: Point3 = Point3 { e: (0.0, 0.0, 0.0) };
     let aspect_ratio: f64 = 1.0;
     (
-        Color{
+        Color {
             e: (153.0 / 256.0, 204.0 / 256.0, 1.0),
         },
         1.0,

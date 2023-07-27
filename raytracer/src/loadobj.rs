@@ -4,8 +4,8 @@ use tobj::{load_obj, LoadOptions};
 
 use crate::{
     bvh::BvhNode,
-    hittable::hittable::{Hittable, HittableList},
     hittable::triangle::Triangle,
+    hittable::{Hittable, HittableList},
     material::lambertian::Lambertian,
     texture::objloadingtexture::ObjLoadingTexture,
     vec3::Point3,

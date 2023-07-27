@@ -1,8 +1,8 @@
 use crate::randoms::{random_double, random_vec};
 use crate::{
     camera::{Camera, NewCamMessage},
-    hittable::hittable::HittableList,
     hittable::sphere::Sphere,
+    hittable::HittableList,
     material::{dielectric::Dielectric, lambertian::Lambertian, metal::Metal},
     texture::{checkertexture::CheckerTexture, solodcolor::SolidColor},
     vec3::{Color, Point3, Vec3},

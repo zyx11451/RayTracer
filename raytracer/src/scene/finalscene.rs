@@ -9,7 +9,7 @@ use crate::{
         constantmedium::ConstantMedium, mybox::MyBox, rect::XzRect, rotate::RotateY,
         translate::Translate,
     },
-    hittable::{flipface::FlipFace, hittable::HittableList},
+    hittable::{flipface::FlipFace, HittableList},
     material::{
         dielectric::Dielectric, diffuselight::DiffuseLight, lambertian::Lambertian, metal::Metal,
     },
@@ -181,7 +181,9 @@ pub fn final_scene() -> (Color, f64, u32, HittableList, Camera) {
     let lookfrom: Point3 = Point3 {
         e: (478.0, 278.0, -600.0),
     };
-    let lookat: Point3 = Point3 { e: (278.0, 278.0, 0.0) };
+    let lookat: Point3 = Point3 {
+        e: (278.0, 278.0, 0.0),
+    };
     let aspect_ratio: f64 = 1.0;
     (
         Color { e: (0.0, 0.0, 0.0) },

@@ -1,7 +1,7 @@
 use std::f64::consts::PI;
 
 use crate::{
-    hittable::hittable::Hittable,
+    hittable::Hittable,
     randoms::{random_cosine_direction, random_double, random_in_semi_sphere},
     vec3::{mul_vec_dot, Onb, Point3, Vec3},
 };
@@ -20,11 +20,12 @@ impl Pdf for TestPdf {
         if cosine <= 0.0 {
             0.0
         } else {
-            1.0 /(2.0* PI)
+            1.0 / (2.0 * PI)
         }
     }
     fn generate(&self) -> Vec3 {
-        self.uvw.local_vec(&random_in_semi_sphere(Vec3 { e: (0.0,0.0,1.0) }))
+        self.uvw
+            .local_vec(&random_in_semi_sphere(Vec3 { e: (0.0, 0.0, 1.0) }))
     }
 }
 #[derive(Clone)]

@@ -1,8 +1,8 @@
+use crate::texture::Texture;
 use crate::{
     perlin::Perlin,
     vec3::{mul_num, Color, Point3},
 };
-use crate::texture::Texture;
 #[derive(Clone)]
 pub struct NoiseTexture {
     pub noise: Perlin,

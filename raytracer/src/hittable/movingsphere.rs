@@ -1,6 +1,6 @@
 use crate::aabb::surrounding_box;
 use crate::aabb::AABB;
-use crate::material::material::Material;
+use crate::material::Material;
 use crate::ray::Ray;
 use crate::vec3::mul_num;
 use crate::vec3::mul_vec_dot;

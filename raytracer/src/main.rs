@@ -14,8 +14,8 @@ pub mod texture;
 pub mod vec3;
 use console::style;
 use edgedetect::edgedetect;
-use hittable::hittable::HitRecord;
-use hittable::hittable::HittableList;
+use hittable::HitRecord;
+use hittable::HittableList;
 use image::{ImageBuffer, RgbImage};
 use indicatif::MultiProgress;
 use indicatif::ProgressBar;
@@ -30,7 +30,7 @@ use std::thread;
 use std::{fs::File, process::exit};
 
 use crate::bvh::BvhNode;
-use crate::hittable::hittable::Hittable;
+use crate::hittable::Hittable;
 #[allow(unused_imports)]
 use crate::scene::{
     cornellbox::cornell_box, cornellboxsmoke::cornell_box_smoke, earth::earth,
@@ -181,10 +181,6 @@ fn main() {
         }
         exit(0);
     }
-    edgedetect(
-        "output/book3/workfinal.jpg",
-        "book3/test_ran_scene_e2.jpg",
-        20,
-    );
+    edgedetect("book3/workfinal.jpg", "book3/test_ran_scene_e2.jpg", 20);
     exit(0);
 }

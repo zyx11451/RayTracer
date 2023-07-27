@@ -1,6 +1,6 @@
 use crate::aabb::AABB;
 use crate::material::isotropic::Isotropic;
-use crate::material::material::Material;
+use crate::material::Material;
 use crate::random_double;
 use crate::ray::Ray;
 use crate::texture::Texture;

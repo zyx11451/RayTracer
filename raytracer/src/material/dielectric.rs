@@ -1,9 +1,9 @@
-use crate::material::material::Material;
-use crate::material::material::ScatterRecord;
-use crate::randoms::{random_double,min};
-use crate::vec3::{reflect,refract,mul_vec_dot};
+use crate::material::Material;
+use crate::material::ScatterRecord;
+use crate::randoms::{min, random_double};
 use crate::vec3::Color;
-use crate::{hittable::hittable::HitRecord, ray::Ray};
+use crate::vec3::{mul_vec_dot, reflect, refract};
+use crate::{hittable::HitRecord, ray::Ray};
 #[derive(Clone)]
 pub struct Dielectric {
     pub ir: f64,

@@ -1,14 +1,15 @@
 use crate::{
+    camera::{Camera, NewCamMessage},
+    hittable::HittableList,
     hittable::{
-        constantmedium::ConstantMedium, mybox::MyBox, rect::XyRect, rect::XzRect, rect::YzRect,
-        rotate::RotateY, translate::Translate, flipface::FlipFace,
+        constantmedium::ConstantMedium, flipface::FlipFace, mybox::MyBox, rect::XyRect,
+        rect::XzRect, rect::YzRect, rotate::RotateY, translate::Translate,
     },
-    hittable::hittable::HittableList,
-    material::{ diffuselight::DiffuseLight, lambertian::Lambertian},
+    material::{diffuselight::DiffuseLight, lambertian::Lambertian},
     texture::solodcolor::SolidColor,
-    vec3::{ Color, Point3, Vec3}, camera::{NewCamMessage, Camera},
+    vec3::{Color, Point3, Vec3},
 };
-pub fn cornell_box_smoke() -> (Color,f64, u32, HittableList, Camera) {
+pub fn cornell_box_smoke() -> (Color, f64, u32, HittableList, Camera) {
     let mut objects = HittableList::new();
     let red = Lambertian {
         albedo: SolidColor {
@@ -124,7 +125,9 @@ pub fn cornell_box_smoke() -> (Color,f64, u32, HittableList, Camera) {
     let lookfrom: Point3 = Point3 {
         e: (278.0, 278.0, -800.0),
     };
-    let lookat: Point3 = Point3 { e: (278.0, 278.0, 0.0) };
+    let lookat: Point3 = Point3 {
+        e: (278.0, 278.0, 0.0),
+    };
     let aspect_ratio: f64 = 1.0;
     (
         Color { e: (0.0, 0.0, 0.0) },

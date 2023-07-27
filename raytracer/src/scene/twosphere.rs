@@ -1,9 +1,10 @@
 use crate::{
+    camera::{Camera, NewCamMessage},
     hittable::sphere::Sphere,
-    hittable:: hittable::HittableList,
-    material:: lambertian::Lambertian,
+    hittable::HittableList,
+    material::lambertian::Lambertian,
     texture::{checkertexture::CheckerTexture, solodcolor::SolidColor},
-    vec3::{ Color, Point3, Vec3}, camera::{Camera, NewCamMessage},
+    vec3::{Color, Point3, Vec3},
 };
 pub fn two_spheres() -> (Color, f64, u32, HittableList, Camera) {
     let mut objects = HittableList::new();
@@ -33,11 +34,9 @@ pub fn two_spheres() -> (Color, f64, u32, HittableList, Camera) {
         e: (13.0, 2.0, 3.0),
     };
     let lookat: Point3 = Point3 { e: (0.0, 0.0, 0.0) };
-    let aspect_ratio: f64 = 16.0/9.0;
+    let aspect_ratio: f64 = 16.0 / 9.0;
     (
-        Color{
-            e: (0.7, 0.8 , 1.0),
-        },
+        Color { e: (0.7, 0.8, 1.0) },
         aspect_ratio,
         1600,
         objects,

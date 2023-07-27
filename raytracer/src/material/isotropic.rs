@@ -1,9 +1,9 @@
-use crate::material::material::Material;
-use crate::material::material::ScatterRecord;
+use crate::material::Material;
+use crate::material::ScatterRecord;
 use crate::randoms::random_in_unit_sphere;
 use crate::texture::{solodcolor::SolidColor, Texture};
 use crate::vec3::Color;
-use crate::{hittable::hittable::HitRecord, ray::Ray};
+use crate::{hittable::HitRecord, ray::Ray};
 
 #[derive(Clone)]
 pub struct Isotropic<T: Texture> {

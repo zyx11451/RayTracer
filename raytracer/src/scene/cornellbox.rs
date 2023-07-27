@@ -1,14 +1,15 @@
 use crate::{
+    camera::{Camera, NewCamMessage},
+    hittable::{flipface::FlipFace, sphere::Sphere, HittableList},
     hittable::{
-         mybox::MyBox, rect::XyRect, rect::XzRect, rect::YzRect,
-        rotate::RotateY, translate::Translate,
+        mybox::MyBox, rect::XyRect, rect::XzRect, rect::YzRect, rotate::RotateY,
+        translate::Translate,
     },
-    hittable::{sphere::Sphere,flipface::FlipFace, hittable::HittableList},
     material::{dielectric::Dielectric, diffuselight::DiffuseLight, lambertian::Lambertian},
     texture::solodcolor::SolidColor,
-    vec3::{ Color, Point3, Vec3}, camera::{Camera, NewCamMessage},
+    vec3::{Color, Point3, Vec3},
 };
-pub fn cornell_box() -> (Color,f64, u32, HittableList, Camera) {
+pub fn cornell_box() -> (Color, f64, u32, HittableList, Camera) {
     let mut objects = HittableList::new();
     let red = Lambertian {
         albedo: SolidColor {
@@ -49,7 +50,7 @@ pub fn cornell_box() -> (Color,f64, u32, HittableList, Camera) {
         z0: 0.0,
         z1: 555.0,
         k: 0.0,
-        mp: red.clone(),
+        mp: red,
     }));
 
     objects.add(Box::new(FlipFace {
@@ -97,7 +98,7 @@ pub fn cornell_box() -> (Color,f64, u32, HittableList, Camera) {
         &Point3 {
             e: (165.0, 330.0, 165.0),
         },
-        white.clone(),
+        white,
     );
     let box1 = RotateY::new(box1, 15.0);
     let box1 = Box::new(Translate {
@@ -133,7 +134,9 @@ pub fn cornell_box() -> (Color,f64, u32, HittableList, Camera) {
     let lookfrom: Point3 = Point3 {
         e: (278.0, 278.0, -800.0),
     };
-    let lookat: Point3 = Point3 { e: (278.0, 278.0, 0.0) };
+    let lookat: Point3 = Point3 {
+        e: (278.0, 278.0, 0.0),
+    };
     let aspect_ratio: f64 = 1.0;
     (
         Color { e: (0.0, 0.0, 0.0) },

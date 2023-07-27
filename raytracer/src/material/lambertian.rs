@@ -1,11 +1,11 @@
 use std::f64::consts::PI;
 
-use crate::material::material::Material;
-use crate::material::material::ScatterRecord;
+use crate::material::Material;
+use crate::material::ScatterRecord;
 use crate::pdf::CosinePdf;
 use crate::texture::Texture;
 use crate::vec3::{mul_vec_dot, Onb, Vec3};
-use crate::{hittable::hittable::HitRecord, ray::Ray};
+use crate::{hittable::HitRecord, ray::Ray};
 #[derive(Clone)]
 pub struct Lambertian<T: Texture> {
     pub albedo: T,

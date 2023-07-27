@@ -1,10 +1,10 @@
 use crate::aabb::AABB;
-use crate::material::material::Material;
+use crate::material::Material;
+use crate::randoms::max;
+use crate::randoms::min;
 use crate::ray::Ray;
 use crate::vec3::mul_vec_cross;
 use crate::vec3::mul_vec_dot;
-use crate::randoms::max;
-use crate::randoms::min;
 use crate::vec3::Point3;
 use crate::vec3::Vec3;
 use crate::HitRecord;
@@ -39,8 +39,8 @@ impl<M: Clone + Material> Hittable for Triangle<M> {
                 t,
                 front_face: true,
                 mat_ptr: &self.mp,
-                u:self.uva.0+v*self.uvab.0+u*self.uvac.0,
-                v:self.uva.1+v*self.uvab.1+u*self.uvac.1,
+                u: self.uva.0 + v * self.uvab.0 + u * self.uvac.0,
+                v: self.uva.1 + v * self.uvab.1 + u * self.uvac.1,
             };
             Some(rec)
         } else {
@@ -70,12 +70,12 @@ impl<M: 'static + Clone + Material> Triangle<M> {
         let pc = mul_vec_cross(ac, n) / l;
         let mut min_ = Vec3::new();
         let mut max_ = Vec3::new();
-        min_.e.0 = min(min(a.e.0, b.e.0), c.e.0)-0.000001;
-        max_.e.0 = max(max(a.e.0, b.e.0), c.e.0)+0.000001;
-        min_.e.1 = min(min(a.e.1, b.e.1), c.e.1)-0.000001;
-        max_.e.1 = max(max(a.e.1, b.e.1), c.e.1)+0.000001;
-        min_.e.2 = min(min(a.e.2, b.e.2), c.e.2)-0.000001;
-        max_.e.2 = max(max(a.e.2, b.e.2), c.e.2)+0.000001;
+        min_.e.0 = min(min(a.e.0, b.e.0), c.e.0) - 0.000001;
+        max_.e.0 = max(max(a.e.0, b.e.0), c.e.0) + 0.000001;
+        min_.e.1 = min(min(a.e.1, b.e.1), c.e.1) - 0.000001;
+        max_.e.1 = max(max(a.e.1, b.e.1), c.e.1) + 0.000001;
+        min_.e.2 = min(min(a.e.2, b.e.2), c.e.2) - 0.000001;
+        max_.e.2 = max(max(a.e.2, b.e.2), c.e.2) + 0.000001;
 
         Self {
             a,

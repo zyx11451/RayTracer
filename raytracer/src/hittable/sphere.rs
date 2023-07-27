@@ -1,5 +1,5 @@
 use crate::aabb::AABB;
-use crate::material::material::Material;
+use crate::material::Material;
 use crate::randoms::random_to_sphere;
 use crate::ray::Ray;
 use crate::vec3::mul_vec_dot;
