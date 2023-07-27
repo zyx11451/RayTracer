@@ -100,7 +100,7 @@ fn ray_color(
     }
 }
 fn main() {
-    let option_edgedetect =false; //true时边缘检测，false时生成图片
+    let option_edgedetect = false; //true时边缘检测，false时生成图片
     if !option_edgedetect {
         let path = std::path::Path::new("output/book3/work.jpg");
         let prefix = path.parent().unwrap();
