@@ -32,16 +32,14 @@ pub fn obj_mtl_load(name: &String) -> HittableList {
             let path = format!("raytracer/objects/{}", name);
             let texture_path = format!("{}/{}", path, texture_name);
             textures.push(ObjLoadingTexture::new(Path::new(&texture_path)));
+        } else if let Some(solid_texture) = mat.diffuse {
+            textures.push(ObjLoadingTexture::new_solid_color((
+                solid_texture[0],
+                solid_texture[1],
+                solid_texture[2],
+            )))
         } else {
-            if let Some(solid_texture) = mat.diffuse {
-                textures.push(ObjLoadingTexture::new_solid_color((
-                    solid_texture[0],
-                    solid_texture[1],
-                    solid_texture[2],
-                )))
-            } else {
-                textures.push(ObjLoadingTexture::new_solid_color((0.0, 0.0, 0.0)));
-            }
+            textures.push(ObjLoadingTexture::new_solid_color((0.0, 0.0, 0.0)));
         }
     }
     for mo in models {

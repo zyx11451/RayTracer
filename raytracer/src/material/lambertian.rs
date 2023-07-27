@@ -3,7 +3,7 @@ use std::f64::consts::PI;
 use crate::material::material::Material;
 use crate::material::material::ScatterRecord;
 use crate::pdf::CosinePdf;
-use crate::texture::texture::Texture;
+use crate::texture::Texture;
 use crate::vec3::{mul_vec_dot, Onb, Vec3};
 use crate::{hittable::hittable::HitRecord, ray::Ray};
 #[derive(Clone)]

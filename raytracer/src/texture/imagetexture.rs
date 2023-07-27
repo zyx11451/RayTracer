@@ -6,7 +6,7 @@ use crate::{
     randoms::clamp,
     vec3::{Color, Point3},
 };
-use crate::texture::texture::Texture;
+use crate::texture::Texture;
 #[derive(Clone)]
 pub struct ImageTexture {
     pub img: RgbImage,

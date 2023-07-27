@@ -3,7 +3,7 @@ use std::{path::Path, sync::Arc};
 use image::{DynamicImage, RgbImage};
 
 use crate::texture::solodcolor::SolidColor;
-use crate::texture::texture::Texture;
+use crate::texture::Texture;
 use crate::{
     randoms::clamp,
     vec3::{Color, Point3},

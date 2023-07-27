@@ -1,6 +1,7 @@
 pub mod aabb;
 pub mod bvh;
 pub mod camera;
+pub mod edgedetect;
 pub mod hittable;
 pub mod loadobj;
 pub mod material;
@@ -12,9 +13,9 @@ pub mod scene;
 pub mod texture;
 pub mod vec3;
 use console::style;
+use edgedetect::edgedetect;
 use hittable::hittable::HitRecord;
 use hittable::hittable::HittableList;
-use image::Rgb;
 use image::{ImageBuffer, RgbImage};
 use indicatif::MultiProgress;
 use indicatif::ProgressBar;
@@ -33,8 +34,8 @@ use crate::hittable::hittable::Hittable;
 #[allow(unused_imports)]
 use crate::scene::{
     cornellbox::cornell_box, cornellboxsmoke::cornell_box_smoke, earth::earth,
-    finalscene::final_scene, myworld::my_world, simplelight::simple_light,
-    twoperlinsphere::two_perlin_sphere,twosphere::two_spheres
+    finalscene::final_scene, myworld::my_world, randomscene::random_scene,
+    simplelight::simple_light, twoperlinsphere::two_perlin_sphere, twosphere::two_spheres,
 };
 
 //use crate::hittable::rect::XzRect;
@@ -44,7 +45,6 @@ use crate::scene::{
 use crate::randoms::random_double;
 use crate::ray::write_color;
 use crate::ray::Ray;
-use crate::scene::randomscene::random_scene;
 use crate::vec3::Color;
 
 fn ray_color(
@@ -99,23 +99,17 @@ fn ray_color(
         background
     }
 }
-fn gray_value(r: u8, g: u8, b: u8) -> u8 {
-    r.max(g.max(b))
-}
-fn pixel_gray_value(rgb: &Rgb<u8>) -> i32 {
-    (gray_value(rgb.0[0], rgb.0[1], rgb.0[2])) as i32
-}
 fn main() {
     //
-    let test_cornell_box = true;
+    let test_cornell_box = false;
     if test_cornell_box {
         let path = std::path::Path::new("output/book3/work.jpg");
         let prefix = path.parent().unwrap();
         std::fs::create_dir_all(prefix).expect("Cannot create all the parents");
         let quality = 100;
-        let samples_per_pixel = 100; //1000
+        let samples_per_pixel = 10; //1000
         let max_depth = 50;
-        let (background, aspect_ratio, width, mut world, cam) = random_scene();
+        let (background, aspect_ratio, width, mut world, cam) = my_world();
         let height = ((width as f64) / aspect_ratio) as u32;
         let lights = HittableList::new();
         let img: RgbImage = ImageBuffer::new(width, height);
@@ -187,175 +181,10 @@ fn main() {
         }
         exit(0);
     }
-    let path = std::path::Path::new("output/book3/test_ran_scene.jpg");
-    let prefix = path.parent().unwrap();
-    std::fs::create_dir_all(prefix).expect("Cannot create all the parents");
-    //Image
-    //random_scene_进行边缘检测的测试
-    let quality = 100;
-    let samples_per_pixel = 100;
-    let max_depth = 50;
-
-    //World
-    let (background, aspect_ratio, width, mut world, cam) = random_scene();
-    let height = ((width as f64) / aspect_ratio) as u32;
-    let img: RgbImage = ImageBuffer::new(width, height);
-    let lights = HittableList::new();
-    let end = world.objects.len() as u32;
-    let bvh = BvhNode::new_nodes(&mut world.objects, 0, end, 0.0, 1.0);
-    //Render
-    let thread_num = 20; //必须是图像高度的因数
-    let main_progress = Arc::new(Mutex::new(MultiProgress::new()));
-    let bvh_a = Arc::new(bvh);
-    let im = Arc::new(Mutex::new(img));
-    let lights = Arc::new(lights);
-    let mut handles = vec![];
-    for p in 0..thread_num {
-        let progress = Arc::new(
-            (*main_progress.lock().unwrap())
-                .add(ProgressBar::new((height * width / thread_num) as u64)),
-        );
-        //let b_in_thread = b.clone();
-        let bvh_a_in_thread = bvh_a.clone();
-        let im_in_thread = im.clone();
-        let lights_in_thread = lights.clone();
-        let each_thread = thread::spawn(move || {
-            for j in (0..height).rev() {
-                if j % thread_num == p {
-                    for i in 0..width {
-                        let mut pixel_color: Color = Color { e: (0.0, 0.0, 0.0) };
-                        let mut s = 0;
-                        while s < samples_per_pixel {
-                            let u =
-                                (1.0 * (i as f64) + random_double(0.0, 1.0)) / (width - 1) as f64;
-                            let v = (1.0 * ((height - j - 1) as f64) + random_double(0.0, 1.0))
-                                / (height - 1) as f64;
-                            let r: Ray = cam.get_ray(u, v);
-                            pixel_color.add_assign(ray_color(
-                                &r,
-                                lights_in_thread.as_ref(),
-                                background,
-                                bvh_a_in_thread.as_ref(),
-                                max_depth,
-                            ));
-                            s += 1;
-                        }
-                        let mut img1 = im_in_thread.lock().unwrap();
-                        let pixel = (*img1).get_pixel_mut(i, j);
-                        *pixel = write_color(pixel_color, samples_per_pixel);
-                        progress.inc(1);
-                    }
-                }
-            }
-            progress.finish();
-        });
-        handles.push(each_thread);
-    }
-
-    main_progress.lock().unwrap().join().unwrap();
-
-    for th in handles {
-        th.join().unwrap();
-    }
-    println!(
-        "Ouput image as \"{}\"",
-        style(path.to_str().unwrap()).yellow()
+    edgedetect(
+        "output/book3/workfinal.jpg",
+        "book3/test_ran_scene_e2.jpg",
+        20,
     );
-    let image_now = (*(im.lock().unwrap())).clone();
-    let output_image = image::DynamicImage::ImageRgb8(image_now);
-    let mut output_file = File::create(path).unwrap();
-    match output_image.write_to(&mut output_file, image::ImageOutputFormat::Jpeg(quality)) {
-        Ok(_) => {}
-        Err(_) => println!("{}", style("Outputting image fails.").red()),
-    }
-    //边缘检测
-    let path = std::path::Path::new("output/book3/test_ran_scene_e.jpg");
-    let prefix = path.parent().unwrap();
-    std::fs::create_dir_all(prefix).expect("Cannot create all the parents");
-    let im1 = Arc::new((*(im.lock().unwrap())).clone());
-    let img2: RgbImage = ImageBuffer::new(width, height);
-    let im2 = Arc::new(Mutex::new(img2));
-    let main_progress = Arc::new(Mutex::new(MultiProgress::new()));
-    let mut handles = vec![];
-    for p in 0..thread_num {
-        let progress = Arc::new(
-            (*main_progress.lock().unwrap())
-                .add(ProgressBar::new((height * width / thread_num) as u64)),
-        );
-        let im_in_thread = im1.clone();
-        let im2_in_thread = im2.clone();
-        let gx = [-1, 0, 1, -2, -0, 2, -1, 0, 1];
-        let gy = [-1, -2, -1, 0, 0, 0, 1, 2, 1];
-        let each_thread = thread::spawn(move || {
-            for j in (0..height).rev() {
-                if j % thread_num == p {
-                    for i in 0..width {
-                        if j != 0 && i != 0 && j != height - 1 && i != width - 1 {
-                            let pixel0 = im_in_thread.get_pixel(i - 1, j - 1);
-                            let pixel1 = im_in_thread.get_pixel(i - 1, j);
-                            let pixel2 = im_in_thread.get_pixel(i - 1, j + 1);
-                            let pixel3 = im_in_thread.get_pixel(i, j - 1);
-                            let pixel4 = im_in_thread.get_pixel(i, j);
-                            let pixel5 = im_in_thread.get_pixel(i, j + 1);
-                            let pixel6 = im_in_thread.get_pixel(i + 1, j - 1);
-                            let pixel7 = im_in_thread.get_pixel(i + 1, j);
-                            let pixel8 = im_in_thread.get_pixel(i + 1, j + 1);
-                            let gxx = pixel_gray_value(pixel0) * gx[0]
-                                + pixel_gray_value(pixel1) * gx[1]
-                                + pixel_gray_value(pixel2) * gx[2]
-                                + pixel_gray_value(pixel3) * gx[3]
-                                + pixel_gray_value(pixel4) * gx[4]
-                                + pixel_gray_value(pixel5) * gx[5]
-                                + pixel_gray_value(pixel6) * gx[6]
-                                + pixel_gray_value(pixel7) * gx[7]
-                                + pixel_gray_value(pixel8) * gx[8];
-                            let gyy = pixel_gray_value(pixel0) * gy[0]
-                                + pixel_gray_value(pixel1) * gy[1]
-                                + pixel_gray_value(pixel2) * gy[2]
-                                + pixel_gray_value(pixel3) * gy[3]
-                                + pixel_gray_value(pixel4) * gy[4]
-                                + pixel_gray_value(pixel5) * gy[5]
-                                + pixel_gray_value(pixel6) * gy[6]
-                                + pixel_gray_value(pixel7) * gy[7]
-                                + pixel_gray_value(pixel8) * gy[8];
-                            let g = ((gxx * gxx + gyy * gyy) as f64).sqrt();
-                            let mut img2 = im2_in_thread.lock().unwrap();
-                            let pixel = (*img2).get_pixel_mut(i, j);
-                            if g > 64.0 {
-                                *pixel = image::Rgb([0_u8, 0_u8, 0_u8])
-                            } else {
-                                *pixel = *pixel4;
-                            }
-
-                            progress.inc(1);
-                        } else {
-                            let mut img2 = im2_in_thread.lock().unwrap();
-                            let pixel = (*img2).get_pixel_mut(i, j);
-                            *pixel = *(im_in_thread.get_pixel(i, j));
-                            progress.inc(1);
-                        }
-                    }
-                }
-            }
-            progress.finish();
-        });
-        handles.push(each_thread);
-    }
-    main_progress.lock().unwrap().join().unwrap();
-
-    for th in handles {
-        th.join().unwrap();
-    }
-    println!(
-        "Ouput image as \"{}\"",
-        style(path.to_str().unwrap()).yellow()
-    );
-    let image_now = (*(im2.lock().unwrap())).clone();
-    let output_image = image::DynamicImage::ImageRgb8(image_now);
-    let mut output_file = File::create(path).unwrap();
-    match output_image.write_to(&mut output_file, image::ImageOutputFormat::Jpeg(quality)) {
-        Ok(_) => {}
-        Err(_) => println!("{}", style("Outputting image fails.").red()),
-    }
     exit(0);
 }

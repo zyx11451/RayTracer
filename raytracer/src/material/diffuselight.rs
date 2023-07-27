@@ -2,7 +2,7 @@ use crate::material::material::Material;
 use crate::material::material::ScatterRecord;
 use crate::vec3::{Color,Point3};
 use crate::{hittable::hittable::HitRecord, ray::Ray};
-use crate::texture::{texture::Texture,solodcolor::SolidColor};
+use crate::texture::{Texture,solodcolor::SolidColor};
 #[derive(Clone)]
 pub struct DiffuseLight<T: Texture> {
     pub emit: T,

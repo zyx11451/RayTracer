@@ -1,4 +1,4 @@
-use crate::texture::texture::Texture;
+use crate::texture::Texture;
 use crate::vec3::{Color, Point3};
 #[derive(Clone)]
 pub struct CheckerTexture<T1: Texture, T2: Texture> {

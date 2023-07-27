@@ -1,11 +1,12 @@
+use crate::randoms::{random_double, random_vec};
 use crate::{
-    hittable::sphere::Sphere,
+    camera::{Camera, NewCamMessage},
     hittable::hittable::HittableList,
-    material::{dielectric::Dielectric,  lambertian::Lambertian, metal::Metal},
+    hittable::sphere::Sphere,
+    material::{dielectric::Dielectric, lambertian::Lambertian, metal::Metal},
     texture::{checkertexture::CheckerTexture, solodcolor::SolidColor},
-    vec3::{Color, Point3, Vec3}, camera::{Camera, NewCamMessage},
+    vec3::{Color, Point3, Vec3},
 };
-use crate::randoms::{random_double,random_vec};
 
 pub fn random_scene() -> (Color, f64, u32, HittableList, Camera) {
     let mut world = HittableList::new();
@@ -102,11 +103,9 @@ pub fn random_scene() -> (Color, f64, u32, HittableList, Camera) {
         e: (13.0, 2.0, 3.0),
     };
     let lookat: Point3 = Point3 { e: (0.0, 0.0, 0.0) };
-    let aspect_ratio: f64 = 16.0/9.0;
+    let aspect_ratio: f64 = 16.0 / 9.0;
     (
-        Color{
-            e: (0.7, 0.8 , 1.0),
-        },
+        Color { e: (0.7, 0.8, 1.0) },
         aspect_ratio,
         1600,
         world,
