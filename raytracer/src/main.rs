@@ -29,29 +29,23 @@ use std::thread;
 use std::{fs::File, process::exit};
 
 use crate::bvh::BvhNode;
-use crate::camera::Camera;
-use crate::camera::NewCamMessage;
 use crate::hittable::hittable::Hittable;
-use crate::scene::cornellbox::cornell_box;
-use crate::scene::cornellboxsmoke::cornell_box_smoke;
-use crate::scene::earth::earth;
-use crate::scene::finalscene::final_scene;
+#[allow(unused_imports)]
+use crate::scene::{
+    cornellbox::cornell_box, cornellboxsmoke::cornell_box_smoke, earth::earth,
+    finalscene::final_scene, myworld::my_world, simplelight::simple_light,
+    twoperlinsphere::two_perlin_sphere,twosphere::two_spheres
+};
+
 //use crate::hittable::rect::XzRect;
 //use crate::hittable::sphere::Sphere;
 //use crate::material::diffuselight::DiffuseLight;
-//use crate::scene::cornellbox::cornell_box;
-use crate::scene::myworld::my_world;
 //use crate::randoms::final_scene;
 use crate::randoms::random_double;
 use crate::ray::write_color;
 use crate::ray::Ray;
 use crate::scene::randomscene::random_scene;
-use crate::scene::simplelight::simple_light;
-use crate::scene::twoperlinsphere::two_perlin_sphere;
-use crate::scene::twosphere::two_spheres;
 use crate::vec3::Color;
-use crate::vec3::Point3;
-use crate::vec3::Vec3;
 
 fn ray_color(
     r: &Ray,
@@ -121,7 +115,7 @@ fn main() {
         let quality = 100;
         let samples_per_pixel = 100; //1000
         let max_depth = 50;
-        let (background,aspect_ratio,width, mut world, cam) = random_scene();
+        let (background, aspect_ratio, width, mut world, cam) = random_scene();
         let height = ((width as f64) / aspect_ratio) as u32;
         let lights = HittableList::new();
         let img: RgbImage = ImageBuffer::new(width, height);
@@ -201,10 +195,9 @@ fn main() {
     let quality = 100;
     let samples_per_pixel = 100;
     let max_depth = 50;
-    
 
     //World
-    let (background,aspect_ratio,width, mut world, cam)= random_scene();
+    let (background, aspect_ratio, width, mut world, cam) = random_scene();
     let height = ((width as f64) / aspect_ratio) as u32;
     let img: RgbImage = ImageBuffer::new(width, height);
     let lights = HittableList::new();
