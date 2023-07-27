@@ -128,7 +128,7 @@ pub fn final_scene() -> (Color, f64, u32, HittableList, Camera) {
         0.0001,
         SolidColor::new(Color { e: (1.0, 1.0, 1.0) }),
     )));
-    let path = std::path::Path::new("raytracer/src/earthmap.jpg");
+    let path = std::path::Path::new("raytracer/src/sourcepictures/earthmap.jpg");
     let emat = Lambertian {
         albedo: ImageTexture::new(path),
     };

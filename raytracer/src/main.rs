@@ -100,7 +100,7 @@ fn ray_color(
     }
 }
 fn main() {
-    let option_edgedetect = true; //true时边缘检测，false时生成图片
+    let option_edgedetect =false; //true时边缘检测，false时生成图片
     if !option_edgedetect {
         let path = std::path::Path::new("output/book3/work.jpg");
         let prefix = path.parent().unwrap();
@@ -108,7 +108,7 @@ fn main() {
         let quality = 100;
         let samples_per_pixel = 10; //1000
         let max_depth = 50;
-        let (background, aspect_ratio, width, mut world, cam) = my_world();
+        let (background, aspect_ratio, width, mut world, cam) = earth();
         let height = ((width as f64) / aspect_ratio) as u32;
         let lights = HittableList::new();
         let img: RgbImage = ImageBuffer::new(width, height);

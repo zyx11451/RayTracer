@@ -35,7 +35,7 @@ impl ObjLoadingTexture {
         }
     }
     pub fn new_solid_color((a, b, c): (f64, f64, f64)) -> Self {
-        let data = std::path::Path::new("raytracer/src/earthmap.jpg");
+        let data = std::path::Path::new("raytracer/src/sourcepictures/earthmap.jpg");
         let img_: DynamicImage = image::open(data).expect("failed");
         let rgb_img: RgbImage = match img_ {
             DynamicImage::ImageRgb8(rgb_img) => rgb_img,

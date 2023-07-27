@@ -8,7 +8,7 @@ use crate::{
 };
 pub fn earth() -> (Color, f64, u32, HittableList, Camera) {
     let mut objects = HittableList::new();
-    let path = std::path::Path::new("raytracer/src/earthmap.jpg");
+    let path = std::path::Path::new("raytracer/src/sourcepictures/earthmap.jpg");
     let earth_texture = ImageTexture::new(path);
 
     let earth_surface = Lambertian {
