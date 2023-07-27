@@ -100,9 +100,8 @@ fn ray_color(
     }
 }
 fn main() {
-    //
-    let test_cornell_box = false;
-    if test_cornell_box {
+    let option_edgedetect = true; //true时边缘检测，false时生成图片
+    if !option_edgedetect {
         let path = std::path::Path::new("output/book3/work.jpg");
         let prefix = path.parent().unwrap();
         std::fs::create_dir_all(prefix).expect("Cannot create all the parents");
